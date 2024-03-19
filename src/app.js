@@ -1,5 +1,5 @@
 import { compileShader } from "./utils/WebGLUtils.js";
-
+import { Line } from "./models/line.js";
 // Get the canvas element
 const canvas = document.getElementById("canvas");
 
@@ -9,29 +9,29 @@ if (!gl) {
 }
 
 const vertexShaderSource = `
-    attribute vec2 a_position;
-    uniform vec2 u_resolution;
-    
-    void main() {
-        // Convert position from pixels to 0.0 to 1.0
-        vec2 zeroToOne = a_position / u_resolution;
-        
-        // Convert from 0->1 to 0->2
-        vec2 zeroToTwo = zeroToOne * 2.0;
-        
-        // Convert from 0->2 to -1->+1 (clip space)
-        vec2 clipSpace = zeroToTwo - 1.0;
-        
-        gl_Position = vec4(clipSpace, 0, 1);
-    }
-`;
+      attribute vec2 a_position;
+      uniform vec2 u_resolution;
+      
+      void main() {
+          // Convert position from pixels to 0.0 to 1.0
+          vec2 zeroToOne = a_position / u_resolution;
+          
+          // Convert from 0->1 to 0->2
+          vec2 zeroToTwo = zeroToOne * 2.0;
+          
+          // Convert from 0->2 to -1->+1 (clip space)
+          vec2 clipSpace = zeroToTwo - 1.0;
+          
+          gl_Position = vec4(clipSpace, 0, 1);
+      }
+  `;
 
 const fragmentShaderSource = `
-    precision mediump float;
-    void main() {
-        gl_FragColor = vec4(1, 0, 0, 1); // Red
-    }
-`;
+      precision mediump float;
+      void main() {
+          gl_FragColor = vec4(1, 0, 0, 1);
+      }
+  `;
 
 const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
 const fragmentShader = compileShader(
@@ -54,17 +54,20 @@ const resolutionUniformLocation = gl.getUniformLocation(
 
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+const line = new Line(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+);
 
-const positions = [0, 0, canvas.width, canvas.height];
+document.getElementById("drawButton").addEventListener("click", () => {
+  const startX = parseFloat(document.getElementById("startX").value);
+  const startY = parseFloat(document.getElementById("startY").value);
+  const endX = parseFloat(document.getElementById("endX").value);
+  const endY = parseFloat(document.getElementById("endY").value);
 
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
-
-gl.enableVertexAttribArray(positionAttributeLocation);
-gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-
-gl.clearColor(0, 0, 0, 0);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-gl.drawArrays(gl.LINES, 0, 2);
+  line.updateCoordinates(startX, startY, endX, endY);
+  line.draw();
+});

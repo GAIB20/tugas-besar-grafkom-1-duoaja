@@ -4,11 +4,12 @@ body {
   margin: 0;
   padding: 25px;
   background-color: #0f0f0f;
+  color: azure;
 }
 
 #canvas {
-  width: 800px;
-  height: 800px;
+  width: 400px;
+  height: 400px;
   background-color: #faefae;
   image-rendering: crisp-edges;
 }
