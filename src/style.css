@@ -1,0 +1,14 @@
+html,
+head,
+body {
+  margin: 0;
+  padding: 25px;
+  background-color: #0f0f0f;
+}
+
+#canvas {
+  width: 800px;
+  height: 800px;
+  background-color: #faefae;
+  image-rendering: crisp-edges;
+}
