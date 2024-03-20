@@ -1,5 +1,7 @@
 import { compileShader } from "./utils/WebGLUtils.js";
 import { Line } from "./models/line.js";
+import { Square } from "./models/square.js";
+
 // Get the canvas element
 const canvas = document.getElementById("canvas");
 
@@ -61,6 +63,17 @@ const line = new Line(
   resolutionUniformLocation,
   canvas
 );
+const square = new Square(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+);
+var positions = [100, 100, 100];
+
+square.updateCoordinates(10, 20, 200);
+square.draw();
 
 document.getElementById("drawButton").addEventListener("click", () => {
   const startX = parseFloat(document.getElementById("startX").value);
