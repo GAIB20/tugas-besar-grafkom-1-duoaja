@@ -1,6 +1,7 @@
 import { compileShader } from "./utils/WebGLUtils.js";
 import { Line } from "./models/line.js";
 import { Square } from "./models/square.js";
+import { Rectangle } from "./models/rectangle.js";
 
 // Get the canvas element
 const canvas = document.getElementById("canvas");
@@ -84,4 +85,19 @@ square.activate();
 
 drawSquareButton.addEventListener("click", function () {
   square.toggleDrawSquareMode();
+});
+
+// rectangle
+const drawRectangleButton = document.getElementById("draw-rectangle");
+const rectangle = new Rectangle(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+);
+rectangle.activate();
+
+drawRectangleButton.addEventListener("click", function () {
+  rectangle.toggleDrawRectangleMode();
 });
