@@ -69,7 +69,8 @@ const line = new Line(
 line.activate();
 
 drawLineButton.addEventListener("click", function () {
-  line.toggleDrawLineMode();
+  console.log("draw line");
+  line.toggleDrawMode();
 });
 
 // square
@@ -84,7 +85,7 @@ const square = new Square(
 square.activate();
 
 drawSquareButton.addEventListener("click", function () {
-  square.toggleDrawSquareMode();
+  square.toggleDrawMode();
 });
 
 // rectangle
@@ -99,7 +100,7 @@ const rectangle = new Rectangle(
 rectangle.activate();
 
 drawRectangleButton.addEventListener("click", function () {
-  rectangle.toggleDrawRectangleMode();
+  rectangle.toggleDrawMode();
 });
 
 // clear

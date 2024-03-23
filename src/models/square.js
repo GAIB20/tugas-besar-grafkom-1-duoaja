@@ -1,4 +1,6 @@
-export class Square {
+import { base_model } from "./base_model.js";
+
+export class Square extends base_model {
   constructor(
     gl,
     program,
@@ -6,18 +8,13 @@ export class Square {
     resolutionUniformLocation,
     canvas
   ) {
-    this.gl = gl;
-    this.program = program;
-    this.positionAttributeLocation = positionAttributeLocation;
-    this.resolutionUniformLocation = resolutionUniformLocation;
-    this.canvas = canvas;
-    this.positions = new Float32Array(4);
-    this.isPressed = false;
-    this.drawSquareMode = false;
-
-    this.mouseDownHandler = this.mouseDownHandler.bind(this);
-    this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
-    this.mouseUpHandler = this.mouseUpHandler.bind(this);
+    super(
+      gl,
+      program,
+      positionAttributeLocation,
+      resolutionUniformLocation,
+      canvas
+    );
   }
 
   mouseDownHandler(e) {
@@ -26,12 +23,8 @@ export class Square {
     this.y1 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
   }
 
-  mouseUpHandler() {
-    this.isPressed = false;
-  }
-
   mouseMoveHandler(e) {
-    if (this.isPressed && this.drawSquareMode) {
+    if (this.isPressed && this.drawMode) {
       this.x2 = e.clientX - this.canvas.offsetLeft;
       this.y2 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
       const dx = this.x2 - this.x1;
@@ -41,15 +34,6 @@ export class Square {
     }
   }
 
-  toggleDrawSquareMode() {
-    this.drawSquareMode = !this.drawSquareMode;
-  }
-
-  activate() {
-    this.canvas.addEventListener("mousedown", this.mouseDownHandler);
-    this.canvas.addEventListener("mouseup", this.mouseUpHandler);
-    this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
-  }
   updateCoordinates(x1, y1, dx, dy) {
     // get length
     const sideLength = Math.max(Math.abs(dx), Math.abs(dy));

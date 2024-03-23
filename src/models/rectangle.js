@@ -1,4 +1,6 @@
-export class Rectangle {
+import { base_model } from "./base_model.js";
+
+export class Rectangle extends base_model {
   constructor(
     gl,
     program,
@@ -6,32 +8,17 @@ export class Rectangle {
     resolutionUniformLocation,
     canvas
   ) {
-    this.gl = gl;
-    this.program = program;
-    this.positionAttributeLocation = positionAttributeLocation;
-    this.resolutionUniformLocation = resolutionUniformLocation;
-    this.canvas = canvas;
-    this.positions = new Float32Array(4);
-    this.isPressed = false;
-    this.drawRectangleMode = false;
-
-    this.mouseDownHandler = this.mouseDownHandler.bind(this);
-    this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
-    this.mouseUpHandler = this.mouseUpHandler.bind(this);
-  }
-
-  mouseDownHandler(e) {
-    this.isPressed = true;
-    this.x1 = e.clientX - this.canvas.offsetLeft;
-    this.y1 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
-  }
-
-  mouseUpHandler() {
-    this.isPressed = false;
+    super(
+      gl,
+      program,
+      positionAttributeLocation,
+      resolutionUniformLocation,
+      canvas
+    );
   }
 
   mouseMoveHandler(e) {
-    if (this.isPressed && this.drawRectangleMode) {
+    if (this.isPressed && this.drawMode) {
       this.x2 = e.clientX - this.canvas.offsetLeft;
       this.y2 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
       const dx = this.x2 - this.x1;
@@ -39,16 +26,6 @@ export class Rectangle {
       this.updateCoordinates(this.x1, this.y1, dx, dy);
       this.draw();
     }
-  }
-
-  toggleDrawRectangleMode() {
-    this.drawRectangleMode = !this.drawRectangleMode;
-  }
-
-  activate() {
-    this.canvas.addEventListener("mousedown", this.mouseDownHandler);
-    this.canvas.addEventListener("mouseup", this.mouseUpHandler);
-    this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
   }
 
   updateCoordinates(x1, y1, dx, dy) {
