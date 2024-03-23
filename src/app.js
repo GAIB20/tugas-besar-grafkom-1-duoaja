@@ -101,3 +101,9 @@ rectangle.activate();
 drawRectangleButton.addEventListener("click", function () {
   rectangle.toggleDrawRectangleMode();
 });
+
+// clear
+const clearButton = document.getElementById("clear");
+clearButton.addEventListener("click", function () {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+});
