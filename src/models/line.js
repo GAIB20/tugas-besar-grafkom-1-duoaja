@@ -8,7 +8,7 @@ export class Line extends base_model {
     resolutionUniformLocation,
     canvas
   ) {
-    super(gl, program, positionAttributeLocation, resolutionUniformLocation, canvas);
+    super(gl, program, positionAttributeLocation, resolutionUniformLocation, canvas, "line");
   }
   mouseMoveHandler(e) {
     if (this.isPressed && this.drawMode) {

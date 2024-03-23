@@ -13,7 +13,8 @@ export class Rectangle extends base_model {
       program,
       positionAttributeLocation,
       resolutionUniformLocation,
-      canvas
+      canvas,
+      "rectangle"
     );
   }
 

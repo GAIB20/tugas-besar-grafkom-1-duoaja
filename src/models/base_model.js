@@ -4,7 +4,8 @@ export class base_model {
     program,
     positionAttributeLocation,
     resolutionUniformLocation,
-    canvas
+    canvas,
+    type
   ) {
     this.gl = gl;
     this.program = program;
@@ -14,6 +15,7 @@ export class base_model {
     this.positions = new Float32Array(0);
     this.isPressed = false;
     this.drawMode = false;
+    this.type = type;
 
     this.mouseDownHandler = this.mouseDownHandler.bind(this);
     this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
@@ -33,12 +35,34 @@ export class base_model {
   toggleDrawMode() {
     this.drawMode = !this.drawMode;
   }
+
   activate() {
     this.canvas.addEventListener("mousedown", this.mouseDownHandler);
     this.canvas.addEventListener("mouseup", this.mouseUpHandler);
     this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
   }
-  
+  save() {
+    const saveObj = {
+      type: this.type,
+      positions: Array.from(this.positions),
+    };
+    const jsonStr = JSON.stringify(saveObj);
+
+    const blob = new Blob([jsonStr], { type: "application/json" });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    const dateAndTime = new Date().toISOString().replace(/:/g, "-");
+    a.download = this.type + "_" + dateAndTime + ".json";
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+  }
   // Override in inherited classes
   mouseMoveHandler(e) {}
   updateCoordinates() {}

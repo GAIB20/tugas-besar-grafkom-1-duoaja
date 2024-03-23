@@ -13,7 +13,8 @@ export class Square extends base_model {
       program,
       positionAttributeLocation,
       resolutionUniformLocation,
-      canvas
+      canvas,
+      "square"
     );
   }
 
