@@ -1,6 +1,5 @@
 import { compileShader } from "./utils/WebGLUtils.js";
 import { Line } from "./models/line.js";
-import { Square } from "./models/square.js";
 
 // Get the canvas element
 const canvas = document.getElementById("canvas");
@@ -56,31 +55,56 @@ const resolutionUniformLocation = gl.getUniformLocation(
 
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-const line = new Line(
-  gl,
-  program,
-  positionAttributeLocation,
-  resolutionUniformLocation,
-  canvas
-);
-const square = new Square(
-  gl,
-  program,
-  positionAttributeLocation,
-  resolutionUniformLocation,
-  canvas
-);
-var positions = [100, 100, 100];
 
-square.updateCoordinates(10, 20, 200);
-square.draw();
+var isPressed = false;
+var x1, y1, x2, y2;
 
-document.getElementById("drawButton").addEventListener("click", () => {
-  const startX = parseFloat(document.getElementById("startX").value);
-  const startY = parseFloat(document.getElementById("startY").value);
-  const endX = parseFloat(document.getElementById("endX").value);
-  const endY = parseFloat(document.getElementById("endY").value);
+const drawLineButton = document.getElementById("draw-line");
+let drawLineMode = false;
 
-  line.updateCoordinates(startX, startY, endX, endY);
-  line.draw();
+drawLineButton.addEventListener("click", function () {
+  // change color of button
+  if (drawLineMode) {
+    drawLineButton.style.backgroundColor = "white";
+    drawLineButton.style.color = "black";
+  } else {
+    drawLineButton.style.backgroundColor = "black";
+    drawLineButton.style.color = "white";
+  }
+  drawLineMode = !drawLineMode;
+});
+
+canvas.addEventListener("mousedown", function (e) {
+  isPressed = true;
+  x1 = e.clientX - canvas.offsetLeft;
+  y1 = canvas.clientHeight - e.clientY + canvas.offsetTop;
+  console.log(
+    "Client X ",
+    e.clientX,
+    "canvas.width: ",
+    canvas.clientWidth,
+    "canvas.offsetLeft: ",
+    canvas.offsetLeft
+  );
+  console.log("x1: ", x1, "y1: ", y1);
+});
+
+canvas.addEventListener("mouseup", function (e) {
+  isPressed = false;
+});
+
+canvas.addEventListener("mousemove", function (e) {
+  if (isPressed && drawLineMode) {
+    x2 = e.clientX - canvas.offsetLeft;
+    y2 = canvas.clientHeight - e.clientY + canvas.offsetTop;
+    const line = new Line(
+      gl,
+      program,
+      positionAttributeLocation,
+      resolutionUniformLocation,
+      canvas
+    );
+    line.updateCoordinates(x1, y1, x2, y2);
+    line.draw();
+  }
 });
