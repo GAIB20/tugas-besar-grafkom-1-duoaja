@@ -1,5 +1,6 @@
 import { compileShader } from "./utils/WebGLUtils.js";
 import { Line } from "./models/line.js";
+import { Square } from "./models/square.js";
 
 // Get the canvas element
 const canvas = document.getElementById("canvas");
@@ -56,55 +57,31 @@ const resolutionUniformLocation = gl.getUniformLocation(
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-var isPressed = false;
-var x1, y1, x2, y2;
-
 const drawLineButton = document.getElementById("draw-line");
-let drawLineMode = false;
+const line = new Line(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+);
+line.activate();
 
 drawLineButton.addEventListener("click", function () {
-  // change color of button
-  if (drawLineMode) {
-    drawLineButton.style.backgroundColor = "white";
-    drawLineButton.style.color = "black";
-  } else {
-    drawLineButton.style.backgroundColor = "black";
-    drawLineButton.style.color = "white";
-  }
-  drawLineMode = !drawLineMode;
+  line.toggleDrawLineMode();
 });
 
-canvas.addEventListener("mousedown", function (e) {
-  isPressed = true;
-  x1 = e.clientX - canvas.offsetLeft;
-  y1 = canvas.clientHeight - e.clientY + canvas.offsetTop;
-  console.log(
-    "Client X ",
-    e.clientX,
-    "canvas.width: ",
-    canvas.clientWidth,
-    "canvas.offsetLeft: ",
-    canvas.offsetLeft
-  );
-  console.log("x1: ", x1, "y1: ", y1);
-});
+// square
+const drawSquareButton = document.getElementById("draw-square");
+const square = new Square(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+);
+square.activate();
 
-canvas.addEventListener("mouseup", function (e) {
-  isPressed = false;
-});
-
-canvas.addEventListener("mousemove", function (e) {
-  if (isPressed && drawLineMode) {
-    x2 = e.clientX - canvas.offsetLeft;
-    y2 = canvas.clientHeight - e.clientY + canvas.offsetTop;
-    const line = new Line(
-      gl,
-      program,
-      positionAttributeLocation,
-      resolutionUniformLocation,
-      canvas
-    );
-    line.updateCoordinates(x1, y1, x2, y2);
-    line.draw();
-  }
+drawSquareButton.addEventListener("click", function () {
+  square.toggleDrawSquareMode();
 });

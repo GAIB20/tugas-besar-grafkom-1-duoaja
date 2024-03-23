@@ -12,17 +12,59 @@ export class Square {
     this.resolutionUniformLocation = resolutionUniformLocation;
     this.canvas = canvas;
     this.positions = new Float32Array(4);
+    this.isPressed = false;
+    this.drawSquareMode = false;
+
+    this.mouseDownHandler = this.mouseDownHandler.bind(this);
+    this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
+    this.mouseUpHandler = this.mouseUpHandler.bind(this);
   }
 
-  updateCoordinates(x1, y1, length) {
-    const x2 = x1 + length;
-    const y2 = y1;
-    const x3 = x1;
-    const y3 = y1 + length;
-    const x4 = x1 + length;
-    const y4 = y1 + length;
-    this.positions = [x1, y1, x2, y2, x3, y3, x4, y4];
-    console.log(this.positions);
+  mouseDownHandler(e) {
+    this.isPressed = true;
+    this.x1 = e.clientX - this.canvas.offsetLeft;
+    this.y1 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+  }
+
+  mouseUpHandler() {
+    this.isPressed = false;
+  }
+
+  mouseMoveHandler(e) {
+    if (this.isPressed && this.drawSquareMode) {
+      this.x2 = e.clientX - this.canvas.offsetLeft;
+      this.y2 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+      const dx = this.x2 - this.x1;
+      const dy = this.y2 - this.y1;
+      this.updateCoordinates(this.x1, this.y1, dx, dy);
+      this.draw();
+    }
+  }
+
+  toggleDrawSquareMode() {
+    this.drawSquareMode = !this.drawSquareMode;
+  }
+
+  activate() {
+    this.canvas.addEventListener("mousedown", this.mouseDownHandler);
+    this.canvas.addEventListener("mouseup", this.mouseUpHandler);
+    this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
+  }
+  updateCoordinates(x1, y1, dx, dy) {
+    // get length
+    const sideLength = Math.max(Math.abs(dx), Math.abs(dy));
+    const xDirection = dx >= 0 ? 1 : -1;
+    const yDirection = dy >= 0 ? 1 : -1;
+    this.positions = new Float32Array([
+      x1,
+      y1,
+      x1,
+      y1 + sideLength * yDirection,
+      x1 + sideLength * xDirection,
+      y1,
+      x1 + sideLength * xDirection,
+      y1 + sideLength * yDirection,
+    ]);
   }
   draw() {
     const gl = this.gl;
