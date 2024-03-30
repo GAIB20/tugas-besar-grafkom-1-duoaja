@@ -14,6 +14,7 @@ const shapes = createShapes(
   resolutionUniformLocation,
   canvas
 );
+let currentActiveShape = null;
 
 function toggleDrawModeForOtherShapes(activeShape) {
   shapes.forEach(({ shape }) => {
@@ -31,6 +32,7 @@ shapes.forEach(({ shape, buttonId, draw }) => {
     if (draw) {
       draw.call({ shape });
     } else {
+      currentActiveShape = shape;
       shape.toggleDrawMode();
     }
   });
@@ -38,9 +40,12 @@ shapes.forEach(({ shape, buttonId, draw }) => {
 
 const saveButton = document.getElementById("save");
 saveButton.addEventListener("click", function () {
-  // line.save();
+  if (currentActiveShape) {
+    currentActiveShape.save();
+  } else {
+    console.log("No active shape to save.");
+  }
 });
-
 // clear
 const clearButton = document.getElementById("clear");
 clearButton.addEventListener("click", function () {
