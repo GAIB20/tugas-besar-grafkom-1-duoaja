@@ -1,4 +1,8 @@
 import { compileShader } from "./WebGLUtils.js";
+import { Line } from "../models/line.js";
+import { Square } from "../models/square.js";
+import { Rectangle } from "../models/rectangle.js";
+import { Polygon } from "../models/polygon.js";
 
 export function initializeWebGL(canvas) {
   const gl = canvas.getContext("webgl");
@@ -62,4 +66,72 @@ export function initializeWebGL(canvas) {
     resolutionUniformLocation,
     positionBuffer,
   };
+}
+
+export function createShapes(
+  gl,
+  program,
+  positionAttributeLocation,
+  resolutionUniformLocation,
+  canvas
+) {
+  return [
+    {
+      shape: new Line(
+        gl,
+        program,
+        positionAttributeLocation,
+        resolutionUniformLocation,
+        canvas
+      ),
+      buttonId: "draw-line",
+    },
+    {
+      shape: new Square(
+        gl,
+        program,
+        positionAttributeLocation,
+        resolutionUniformLocation,
+        canvas
+      ),
+      buttonId: "draw-square",
+    },
+    {
+      shape: new Rectangle(
+        gl,
+        program,
+        positionAttributeLocation,
+        resolutionUniformLocation,
+        canvas
+      ),
+      buttonId: "draw-rectangle",
+    },
+    // {
+    //   shape: new Polygon(
+    //     gl,
+    //     program,
+    //     positionAttributeLocation,
+    //     resolutionUniformLocation,
+    //     canvas
+    //   ),
+    //   buttonId: "draw-polygon",
+    //   draw: function () {
+    //     this.shape.updateCoordinates(
+    //       150,
+    //       75,
+    //       225,
+    //       100,
+    //       225,
+    //       150,
+    //       150,
+    //       175,
+    //       75,
+    //       150,
+    //       75,
+    //       100
+    //     );
+    //     this.shape.draw();
+    //   },
+    // },
+  ];
 }
