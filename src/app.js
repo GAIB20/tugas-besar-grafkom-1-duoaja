@@ -24,10 +24,21 @@ function toggleDrawModeForOtherShapes(activeShape) {
   });
 }
 
+function resetButtonStyles() {
+  shapes.forEach(({ buttonId }) => {
+    const button = document.getElementById(buttonId);
+    button.style.backgroundColor = "";
+    button.style.color = "";
+  });
+}
+
 shapes.forEach(({ shape, buttonId, draw }) => {
   shape.activate();
   const button = document.getElementById(buttonId);
   button.addEventListener("click", function () {
+    resetButtonStyles();
+    this.style.backgroundColor = "blue";
+    this.style.color = "white";
     toggleDrawModeForOtherShapes(shape);
     if (draw) {
       draw.call({ shape });
