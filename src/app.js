@@ -5,8 +5,13 @@ import { createShapes } from "./utils/WebGLSetup.js";
 const canvas = document.getElementById("canvas");
 
 // Initialize WebGL
-const { gl, program, positionAttributeLocation, resolutionUniformLocation } =
-  initializeWebGL(canvas);
+const {
+  gl,
+  program,
+  positionAttributeLocation,
+  colorUniformLocation,
+  resolutionUniformLocation,
+} = initializeWebGL(canvas);
 const shapes = createShapes(
   gl,
   program,
@@ -48,6 +53,24 @@ shapes.forEach(({ shape, buttonId, draw }) => {
     }
   });
 });
+gl.uniform4f(colorUniformLocation, 0.0, 1.0, 0.0, 1.0);
+document
+  .querySelector("#colorPicker")
+  .addEventListener("input", function (event) {
+    const colorHex = colorPicker.value;
+    const r = parseInt(colorHex.substr(1, 2), 16) / 255.0;
+    const g = parseInt(colorHex.substr(3, 2), 16) / 255.0;
+    const b = parseInt(colorHex.substr(5, 2), 16) / 255.0;
+
+    gl.useProgram(program);
+    gl.uniform4f(colorUniformLocation, r, g, b, 1.0);
+    drawScene();
+  });
+
+function drawScene() {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  currentActiveShape.draw();
+}
 
 const saveButton = document.getElementById("save");
 saveButton.addEventListener("click", function () {

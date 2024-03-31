@@ -18,13 +18,10 @@ export function initializeWebGL(canvas) {
     uniform vec2 u_resolution;
 
     void main() {
-        // Convert position from pixels to 0.0 to 1.0
         vec2 zeroToOne = a_position / u_resolution;
         
-        // Convert from 0->1 to 0->2
         vec2 zeroToTwo = zeroToOne * 2.0;
         
-        // Convert from 0->2 to -1->+1 (clip space)
         vec2 clipSpace = zeroToTwo - 1.0;
         
         gl_Position = vec4(clipSpace, 0, 1);
@@ -33,11 +30,14 @@ export function initializeWebGL(canvas) {
 
   const fragmentShaderSource = `
         precision mediump float;
-        void main() {
-            gl_FragColor = vec4(1, 0, 0, 1);
-        }
-        `;
 
+        //uniform color
+        uniform vec4 u_color;
+        
+        void main() {
+            gl_FragColor = u_color;
+        }
+  `;
   const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
   const fragmentShader = compileShader(
     gl,
@@ -59,11 +59,13 @@ export function initializeWebGL(canvas) {
 
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  const colorUniformLocation = gl.getUniformLocation(program, "u_color");
   return {
     gl,
     program,
     positionAttributeLocation,
     resolutionUniformLocation,
+    colorUniformLocation,
     positionBuffer,
   };
 }
