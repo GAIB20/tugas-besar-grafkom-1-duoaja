@@ -279,17 +279,39 @@ export class ShapeManager {
     // Listener for clearing the canvas from clear button
     clearCanvas() {
         this.shapes = [];
-        this.drawScene();
+        this.activeShape = null;
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        // remove all vertex dots
+        const vertexDots = document.querySelectorAll('.vertex-dot');
+        vertexDots.forEach(dot => {
+            dot.remove();
+        });
     }
 
     // Handle Save Button Click
     save() {
-        // TODO : SAVE ALL SHAPES
-        if (this.activeShape) {
-            this.activeShape.save();
-        } else {
-            console.log("No active shape to save.");
-        }
+        // Save all shapes in JSON format
+        const saveObj = this.shapes.map(shape => {
+            return {
+                type: shape.type,
+                positions: Array.from(shape.positions),
+                colors: Array.from(shape.colors),
+            };
+        });
+        const jsonStr = JSON.stringify(saveObj);
+        console.log(jsonStr);
+
+        // Create a blob and download the JSON file
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const dateAndTime = new Date().toISOString().replace(/:/g, "-");
+        a.download = "shapes_" + dateAndTime + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // color picker event listener
