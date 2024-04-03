@@ -2,6 +2,7 @@ import { Line } from "./line.js";
 import { Square } from "./square.js";
 import { Rectangle } from "./rectangle.js";
 import { initializeWebGL } from "../utils/WebGLSetup.js";
+import { addVertexDot, hexColorToFloatArray } from "../utils/utils.js";
 // import { Polygon } from "./polygon.js";
 
 export class ShapeManager {
@@ -45,11 +46,20 @@ export class ShapeManager {
         // Save Button
         const saveButton = document.getElementById("save");
         saveButton.addEventListener("click", () => this.save());
+
+        // Color Picker
+        this.colorPickerHandler();
+
+        // Selector
+        const select = document.getElementById("selector");
+        select.addEventListener("click", (event) => {
+            this.activeType = 'selector';
+            this.activeShape = null;
+        });
     }
 
     // Create a new shape based on the shape type
     setupShapeCreation(buttonId, shapeType) {
-        console.log("setupShapeCreation");
         const button = document.getElementById(buttonId);
         button.addEventListener("click", () => {
             this.activeType = shapeType;
@@ -68,10 +78,30 @@ export class ShapeManager {
     }
     // Toggle draw mode for active shape
     mouseDownHandler(e) {
+        if (this.activeType === 'selector') {
+            const x = e.clientX - this.canvas.offsetLeft;
+            const y = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+            this.shapes.forEach(shape => {
+                if (shape.isInside(x, y)) {
+                    this.activeShape = shape;
+                    this.activeShape.toggleDrawMode();
+                    this.toggleDrawModeForOtherShapes(shape);
+                }
+            });
+            return;
+        }
         if (this.activeType) {
             const newShape = this.createShape(this.activeType);
             newShape.activate();
             this.activeShape = newShape;
+
+            // get color from color picker
+            const colorPicker = document.getElementById("colorPicker");
+            const colorHex = colorPicker.value;
+            const { r, g, b } = hexColorToFloatArray(colorHex);
+
+            // update shape color
+            this.activeShape.bindColorBuffer(new Float32Array([r, g, b, 1.0]));
             this.activeShape.handleMouseDown(e);
             this.activeShape.toggleDrawMode();
             this.toggleDrawModeForOtherShapes(newShape);
@@ -80,11 +110,128 @@ export class ShapeManager {
     }
     // After create a new shape instance, then wait until mouse up event to redraw all shapes
     mouseUpHandler(e) {
-        if (this.activeShape) {
+        if (this.activeShape && this.activeType !== 'selector') {
             this.activeShape.mouseUpHandler(e);
+            addVertexDot(this.canvas, this.activeShape.positions, this.shapes.length - 1);
+            // setup for vertex with data-shape-index = this.shapes.length - 1
+
+            this.setupVertexDotEventListeners(this.shapes.length - 1);
         }
         this.shapes.forEach(shape => {
             shape.draw();
+        });
+    }
+
+    // Setup Event Listener for each Vertex
+    setupVertexDotEventListeners(shapeIndex) {
+        // get all vertex dots with data-shape-index = shapeIndex
+        const vertexDots = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
+        vertexDots.forEach(dot => {
+            dot.addEventListener("click", (e) => {
+                const vertexIndex = parseInt(dot.getAttribute("data-vertex-index"));
+                const shapeIndex = parseInt(dot.getAttribute("data-shape-index"));
+                this.showColorPicker(vertexIndex, shapeIndex);
+                this.showTranslationBars(vertexIndex, shapeIndex);
+            });
+        });
+    }
+    // Color Picker
+    showColorPicker(vertexIndex, shapeIndex) {
+        const currentShape = this.shapes[shapeIndex];
+        const existingPicker = document.getElementById('vertex-color-picker');
+        if (existingPicker) {
+            existingPicker.remove();
+        }
+
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.id = 'vertex-color-picker';
+        colorPicker.style.position = 'absolute';
+        colorPicker.style.left = `100px`;
+        colorPicker.style.top = `100px`;
+
+        document.body.appendChild(colorPicker);
+
+        colorPicker.focus();
+
+        colorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            const { r, g, b } = hexColorToFloatArray(color);
+            const newColor = [r, g, b, 1];
+
+            for (let i = 0; i < 4; i++) {
+                currentShape.colors[vertexIndex * 4 + i] = newColor[i];
+            }
+            this.shapes.forEach(shape => {
+                shape.draw();
+            });
+        });
+
+        colorPicker.addEventListener('blur', (e) => {
+            colorPicker.remove();
+        });
+    }
+
+    // Slider for change vertex position
+    showTranslationBars(vertexIndex, shapeIndex) {
+        const currentShape = this.shapes[shapeIndex];
+
+        const existingUI = document.getElementById('translation-ui');
+        if (existingUI) {
+            existingUI.remove();
+        }
+
+        const uiContainer = document.createElement('div');
+        uiContainer.id = 'translation-ui';
+        uiContainer.style.position = 'absolute';
+        uiContainer.style.left = `${150}px`;
+        uiContainer.style.top = `${100}px`;
+        document.body.appendChild(uiContainer);
+
+        // Create X-axis slider
+        const xSlider = document.createElement('input');
+        xSlider.type = 'range';
+        xSlider.min = '0';
+        xSlider.max = this.canvas.clientWidth.toString();
+        xSlider.value = currentShape.positions[vertexIndex * 2].toString();
+        uiContainer.appendChild(xSlider);
+
+        // Create Y-axis slider
+        const ySlider = document.createElement('input');
+        ySlider.type = 'range';
+        ySlider.min = '0';
+        ySlider.max = this.canvas.clientHeight.toString();
+        ySlider.value = currentShape.positions[vertexIndex * 2 + 1].toString();
+        uiContainer.appendChild(ySlider);
+
+        // Create a button to remove the UI
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', () => uiContainer.remove());
+        uiContainer.appendChild(removeButton);
+
+        // Slider event listeners to update vertex position
+        xSlider.addEventListener('input', () => {
+            currentShape.positions[vertexIndex * 2] = parseFloat(xSlider.value);
+            // remove the vertex dot with data-shape-index = shapeIndex
+            document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`).forEach(dot => dot.remove());
+            // add new vertex dot
+            addVertexDot(this.canvas, currentShape.positions, shapeIndex);
+            this.setupVertexDotEventListeners(shapeIndex);
+            this.shapes.forEach(shape => {
+                shape.draw();
+            });
+        });
+        ySlider.addEventListener('input', () => {
+            currentShape.positions[vertexIndex * 2 + 1] = parseFloat(ySlider.value);
+            // remove the vertex dot with data-shape-index = shapeIndex
+            document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`).forEach(dot => dot.remove());
+            // add new vertex dot
+            addVertexDot(this.canvas, currentShape.positions, shapeIndex);
+            this.setupVertexDotEventListeners(shapeIndex);
+            this.shapes.forEach(shape => {
+                shape.draw();
+            });
         });
     }
     // Handle mouse move event
@@ -103,6 +250,13 @@ export class ShapeManager {
         this.shapes.forEach(shape => {
             if (shape !== activeShape) {
                 shape.toggleDrawMode();
+            }
+        });
+        // change button color
+        const otherButtons = document.querySelectorAll(".draw-button");
+        otherButtons.forEach(otherButton => {
+            if (otherButton !== activeShape) {
+                otherButton.style.backgroundColor = "white";
             }
         });
     }
@@ -143,13 +297,11 @@ export class ShapeManager {
         const colorPicker = document.getElementById("colorPicker");
         colorPicker.addEventListener("input", (event) => {
             const colorHex = colorPicker.value;
-            const r = parseInt(colorHex.substr(1, 2), 16) / 255.0;
-            const g = parseInt(colorHex.substr(3, 2), 16) / 255.0;
-            const b = parseInt(colorHex.substr(5, 2), 16) / 255.0;
+            const { r, g, b } = hexColorToFloatArray(colorHex);
 
             // update shape color
             if (this.activeShape) {
-                this.activeShape.colors = new Float32Array([r, g, b, 1.0, r, g, b, 1.0]);
+                this.activeShape.bindColorBuffer(new Float32Array([r, g, b, 1.0]));
                 this.activeShape.draw();
             }
         });

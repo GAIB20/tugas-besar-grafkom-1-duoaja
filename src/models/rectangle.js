@@ -48,16 +48,32 @@ export class Rectangle extends base_model {
     gl.enableVertexAttribArray(this.positionAttributeLocation);
 
     // BIND COLOR BUFFER
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+    this.bindColorBuffer(this.colors);
     gl.vertexAttribPointer(this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.colorAttributeLocation);
 
-    const error = gl.getError();
-    if (error !== gl.NO_ERROR) {
-      console.error('WebGL Error:', error);
-    }
-
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  isInside(x, y) {
+    let [x1, y1, x2, y2, x3, y3, x4, y4] = this.positions;
+    if (x2 > x3) {
+      [x2, x3] = [x3, x2];
+    }
+    if (y2 > y3) {
+      [y2, y3] = [y3, y2];
+    }
+    const isInside = (x > x2 && x < x3) && (y > y2 && y < y3);
+    console.log("isInside", isInside);
+    return isInside;
+  }
+  bindColorBuffer(colors) {
+    if (colors.length === 4) {
+      colors = new Float32Array([
+        ...colors, ...colors, ...colors, ...colors
+      ]);
+    }
+    this.colors = colors;
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.STATIC_DRAW);
   }
 }
