@@ -5,17 +5,27 @@ export class Rectangle extends base_model {
     gl,
     program,
     positionAttributeLocation,
-    resolutionUniformLocation,
+    colorAttributeLocation,
     canvas
   ) {
     super(
       gl,
       program,
       positionAttributeLocation,
-      resolutionUniformLocation,
+      colorAttributeLocation,
       canvas,
       "rectangle"
     );
+    this.colors = new Float32Array(0);
+    for (let i = 0; i < 4; i++) {
+      this.colors = new Float32Array([
+        ...this.colors,
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        1.0,
+      ]);
+    }
   }
 
   mouseMoveHandler(e) {
@@ -36,19 +46,21 @@ export class Rectangle extends base_model {
   }
   draw() {
     const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    const normalizedPositions = this.positions.map((position, i) => {
+      if (i % 2 === 0) {
+        return position / this.canvas.clientWidth * 2 - 1;
+      } else {
+        return position / this.canvas.clientHeight * 2 - 1;
+      }
+    });
+
+    // Bind the position buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
-      new Float32Array(this.positions),
+      new Float32Array(normalizedPositions),
       gl.STATIC_DRAW
     );
-
-    gl.uniform2f(
-      this.resolutionUniformLocation,
-      this.canvas.width,
-      this.canvas.height
-    );
-    gl.enableVertexAttribArray(this.positionAttributeLocation);
     gl.vertexAttribPointer(
       this.positionAttributeLocation,
       2,
@@ -57,6 +69,25 @@ export class Rectangle extends base_model {
       0,
       0
     );
+    gl.enableVertexAttribArray(this.positionAttributeLocation);
+
+    // BIND COLOR BUFFER
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(
+      this.colorAttributeLocation,
+      4,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    gl.enableVertexAttribArray(this.colorAttributeLocation);
+
+    const error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+      console.error('WebGL Error:', error);
+    }
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

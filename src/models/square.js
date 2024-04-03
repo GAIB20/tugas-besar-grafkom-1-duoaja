@@ -5,23 +5,27 @@ export class Square extends base_model {
     gl,
     program,
     positionAttributeLocation,
-    resolutionUniformLocation,
+    colorAttributeLocation,
     canvas
   ) {
     super(
       gl,
       program,
       positionAttributeLocation,
-      resolutionUniformLocation,
+      colorAttributeLocation,
       canvas,
       "square"
     );
-  }
-
-  mouseDownHandler(e) {
-    this.isPressed = true;
-    this.x1 = e.clientX - this.canvas.offsetLeft;
-    this.y1 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+    this.colors = new Float32Array(0);
+    for (let i = 0; i < 4; i++) {
+      this.colors = new Float32Array([
+        ...this.colors,
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        1.0,
+      ]);
+    }
   }
 
   mouseMoveHandler(e) {
@@ -36,7 +40,6 @@ export class Square extends base_model {
   }
 
   updateCoordinates(x1, y1, dx, dy) {
-    // get length
     const sideLength = Math.max(Math.abs(dx), Math.abs(dy));
     const xDirection = dx >= 0 ? 1 : -1;
     const yDirection = dy >= 0 ? 1 : -1;
@@ -53,19 +56,23 @@ export class Square extends base_model {
   }
   draw() {
     const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.positions),
-      gl.STATIC_DRAW
+    // normalize the positions
+    const normalizedPositions = this.positions.map((pos, i) => {
+      if (i % 2 === 0) {
+        return pos / this.canvas.clientWidth * 2 - 1;
+      } else {
+        return pos / this.canvas.clientHeight * 2 - 1;
+      }
+    }
     );
 
-    gl.uniform2f(
-      this.resolutionUniformLocation,
-      this.canvas.width,
-      this.canvas.height
+    // BIND POSITION BUFFER
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(normalizedPositions),
+      gl.STATIC_DRAW
     );
-    gl.enableVertexAttribArray(this.positionAttributeLocation);
     gl.vertexAttribPointer(
       this.positionAttributeLocation,
       2,
@@ -74,6 +81,25 @@ export class Square extends base_model {
       0,
       0
     );
+    gl.enableVertexAttribArray(this.positionAttributeLocation);
+
+    // BIND COLOR BUFFER
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(
+      this.colorAttributeLocation,
+      4,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    gl.enableVertexAttribArray(this.colorAttributeLocation);
+
+    const error = gl.getError();
+    if (error !== gl.NO_ERROR) {
+      console.error('WebGL Error:', error);
+    }
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

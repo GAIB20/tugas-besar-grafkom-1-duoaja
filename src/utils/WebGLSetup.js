@@ -15,27 +15,22 @@ export function initializeWebGL(canvas) {
 
   const vertexShaderSource = `
     attribute vec2 a_position;
-    uniform vec2 u_resolution;
-
+    attribute vec4 a_color;
+    varying vec4 v_color;
     void main() {
-        vec2 zeroToOne = a_position / u_resolution;
-        
-        vec2 zeroToTwo = zeroToOne * 2.0;
-        
-        vec2 clipSpace = zeroToTwo - 1.0;
-        
-        gl_Position = vec4(clipSpace, 0, 1);
+      gl_Position = vec4(a_position, 0, 1);
+      v_color = a_color;
     }
     `;
 
   const fragmentShaderSource = `
         precision mediump float;
-
+        varying vec4 v_color;
         //uniform color
-        uniform vec4 u_color;
+        //uniform vec4 u_color;
         
         void main() {
-            gl_FragColor = u_color;
+            gl_FragColor = v_color;
         }
   `;
   const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
@@ -51,22 +46,22 @@ export function initializeWebGL(canvas) {
   gl.linkProgram(program);
   gl.useProgram(program);
 
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+    return null; // Consider returning null or handling the error appropriately
+  }
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-  const resolutionUniformLocation = gl.getUniformLocation(
-    program,
-    "u_resolution"
-  );
 
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  const colorUniformLocation = gl.getUniformLocation(program, "u_color");
+  const colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  const colorLocation = gl.getAttribLocation(program, "a_color");
   return {
     gl,
     program,
     positionAttributeLocation,
-    resolutionUniformLocation,
-    colorUniformLocation,
-    positionBuffer,
+    colorLocation,
   };
 }
 
@@ -74,7 +69,7 @@ export function createShapes(
   gl,
   program,
   positionAttributeLocation,
-  resolutionUniformLocation,
+  colorLocation,
   canvas
 ) {
   return [
@@ -83,7 +78,7 @@ export function createShapes(
         gl,
         program,
         positionAttributeLocation,
-        resolutionUniformLocation,
+        colorLocation,
         canvas
       ),
       buttonId: "draw-line",
@@ -93,7 +88,7 @@ export function createShapes(
         gl,
         program,
         positionAttributeLocation,
-        resolutionUniformLocation,
+        colorLocation,
         canvas
       ),
       buttonId: "draw-square",
@@ -103,7 +98,7 @@ export function createShapes(
         gl,
         program,
         positionAttributeLocation,
-        resolutionUniformLocation,
+        colorLocation,
         canvas
       ),
       buttonId: "draw-rectangle",
