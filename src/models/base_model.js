@@ -1,12 +1,5 @@
 export class base_model {
-  constructor(
-    gl,
-    program,
-    positionAttributeLocation,
-    colorAttributeLocation,
-    canvas,
-    type
-  ) {
+  constructor(gl, program, positionAttributeLocation, colorAttributeLocation, canvas, type) {
     this.gl = gl;
     this.program = program;
     this.positionAttributeLocation = positionAttributeLocation;
@@ -19,21 +12,15 @@ export class base_model {
     this.positionBuffer = this.gl.createBuffer();
     this.colorBuffer = this.gl.createBuffer();
     this.colors = new Float32Array(0);
-    this.mouseDownHandler = this.mouseDownHandler.bind(this);
+    // this.canvas.addEventListener("mouseDown", () => {
+    //   this.handleMouseDown(this);
+    // });
+    // this.mouseDownHandler = this.mouseDownHandler.bind(this);
     this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
     this.mouseUpHandler = this.mouseUpHandler.bind(this);
   }
-  normalizeCoordinates(x, y) {
-    const normalizeX = x / this.canvas.clientWidth * 2 - 1;
-    const normalizeY = y / this.canvas.clientHeight * 2 - 1;
-    return {
-      normalizeX,
-      normalizeY
-    };
-  }
-  mouseDownHandler(e) {
-    console.log("MOUSE DOWN")
-    document.querySelectorAll('.vertex-dot').forEach(dot => dot.remove());
+
+  handleMouseDown(e) {
     this.isPressed = true;
     this.x1 = e.clientX - this.canvas.offsetLeft;
     this.y1 = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
@@ -53,6 +40,7 @@ export class base_model {
     this.canvas.addEventListener("mouseup", this.mouseUpHandler);
     this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
   }
+
   save() {
     const saveObj = {
       type: this.type,
@@ -75,11 +63,11 @@ export class base_model {
 
     URL.revokeObjectURL(url);
   }
+
   addVertexDot() {
-    console.log("CALLED");
     const canvasRect = this.canvas.getBoundingClientRect();
     this.positions.forEach((pos, i) => {
-      if (i % 2 === 0) { // Coordinate X
+      if (i % 2 === 0) {
         const dot = document.createElement('div');
         dot.className = 'vertex-dot';
         dot.setAttribute('data-vertex-index', i / 2);
@@ -108,6 +96,7 @@ export class base_model {
       }
     });
   }
+
   changeVertexColor(vertexIndex, hexColor) {
     const r = parseInt(hexColor.substr(1, 2), 16) / 255;
     const g = parseInt(hexColor.substr(3, 2), 16) / 255;
@@ -188,19 +177,13 @@ export class base_model {
 
     // Slider event listeners to update vertex position
     xSlider.addEventListener('input', () => {
-      console.log(parseFloat(xSlider.value));
-      console.log("before", this.positions[vertexIndex * 2]);
       this.positions[vertexIndex * 2] = parseFloat(xSlider.value);
-      console.log("after", this.positions[vertexIndex * 2]);
       // remove the vertex dot
       document.querySelectorAll('.vertex-dot').forEach(dot => dot.remove());
       this.updateBuffersAndDraw();
     });
     ySlider.addEventListener('input', () => {
-      console.log(parseFloat(ySlider.value));
-      console.log("before", this.positions[vertexIndex * 2 + 1]);
       this.positions[vertexIndex * 2 + 1] = parseFloat(ySlider.value);
-      console.log("after", this.positions[vertexIndex * 2 + 1]);
       // remove the vertex dot
       document.querySelectorAll('.vertex-dot').forEach(dot => dot.remove());
       this.updateBuffersAndDraw();

@@ -48,7 +48,7 @@ export function initializeWebGL(canvas) {
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
-    return null; // Consider returning null or handling the error appropriately
+    return null;
   }
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 
@@ -65,70 +65,115 @@ export function initializeWebGL(canvas) {
   };
 }
 
-export function createShapes(
-  gl,
+// export function createShapes(
+//   gl,
+//   program,
+//   positionAttributeLocation,
+//   colorLocation,
+//   canvas
+// ) {
+//   return [
+//     {
+//       shape: new Line(
+//         gl,
+//         program,
+//         positionAttributeLocation,
+//         colorLocation,
+//         canvas
+//       ),
+//       buttonId: "draw-line",
+//     },
+//     {
+//       shape: new Square(
+//         gl,
+//         program,
+//         positionAttributeLocation,
+//         colorLocation,
+//         canvas
+//       ),
+//       buttonId: "draw-square",
+//     },
+//     {
+//       shape: new Rectangle(
+//         gl,
+//         program,
+//         positionAttributeLocation,
+//         colorLocation,
+//         canvas
+//       ),
+//       buttonId: "draw-rectangle",
+//     },
+//     // {
+//     //   shape: new Polygon(
+//     //     gl,
+//     //     program,
+//     //     positionAttributeLocation,
+//     //     resolutionUniformLocation,
+//     //     canvas
+//     //   ),
+//     //   buttonId: "draw-polygon",
+//     //   draw: function () {
+//     //     this.shape.updateCoordinates(
+//     //       150,
+//     //       75,
+//     //       225,
+//     //       100,
+//     //       225,
+//     //       150,
+//     //       150,
+//     //       175,
+//     //       75,
+//     //       150,
+//     //       75,
+//     //       100
+//     //     );
+//     //     this.shape.draw();
+//     //   },
+//     // },
+//   ];
+// }
+
+export function createShape(gl,
   program,
   positionAttributeLocation,
   colorLocation,
-  canvas
+  canvas,
+  type
 ) {
-  return [
-    {
-      shape: new Line(
+  switch (type) {
+    case "line":
+      return new Line(
         gl,
         program,
         positionAttributeLocation,
         colorLocation,
         canvas
-      ),
-      buttonId: "draw-line",
-    },
-    {
-      shape: new Square(
+      );
+    case "square":
+      return new Square(
         gl,
         program,
         positionAttributeLocation,
         colorLocation,
         canvas
-      ),
-      buttonId: "draw-square",
-    },
-    {
-      shape: new Rectangle(
+      );
+    case "rectangle":
+      return new Rectangle(
         gl,
         program,
         positionAttributeLocation,
         colorLocation,
         canvas
-      ),
-      buttonId: "draw-rectangle",
-    },
-    // {
-    //   shape: new Polygon(
+      );
+    // case "polygon":
+    //   return new Polygon(
     //     gl,
     //     program,
     //     positionAttributeLocation,
-    //     resolutionUniformLocation,
+    //     colorLocation,
     //     canvas
-    //   ),
-    //   buttonId: "draw-polygon",
-    //   draw: function () {
-    //     this.shape.updateCoordinates(
-    //       150,
-    //       75,
-    //       225,
-    //       100,
-    //       225,
-    //       150,
-    //       150,
-    //       175,
-    //       75,
-    //       150,
-    //       75,
-    //       100
-    //     );
-    //     this.shape.draw();
-    //   },
-    // },
-  ];
+    //   );
+    default:
+      return null;
+  }
 }

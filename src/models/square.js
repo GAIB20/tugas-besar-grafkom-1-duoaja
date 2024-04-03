@@ -1,21 +1,8 @@
 import { base_model } from "./base_model.js";
 
 export class Square extends base_model {
-  constructor(
-    gl,
-    program,
-    positionAttributeLocation,
-    colorAttributeLocation,
-    canvas
-  ) {
-    super(
-      gl,
-      program,
-      positionAttributeLocation,
-      colorAttributeLocation,
-      canvas,
-      "square"
-    );
+  constructor(gl, program, positionAttributeLocation, colorAttributeLocation, canvas) {
+    super(gl, program, positionAttributeLocation, colorAttributeLocation, canvas, "square");
     this.colors = new Float32Array(0);
     for (let i = 0; i < 4; i++) {
       this.colors = new Float32Array([
@@ -44,14 +31,10 @@ export class Square extends base_model {
     const xDirection = dx >= 0 ? 1 : -1;
     const yDirection = dy >= 0 ? 1 : -1;
     this.positions = new Float32Array([
-      x1,
-      y1,
-      x1,
-      y1 + sideLength * yDirection,
-      x1 + sideLength * xDirection,
-      y1,
-      x1 + sideLength * xDirection,
-      y1 + sideLength * yDirection,
+      x1, y1,
+      x1, y1 + sideLength * yDirection,
+      x1 + sideLength * xDirection, y1,
+      x1 + sideLength * xDirection, y1 + sideLength * yDirection,
     ]);
   }
   draw() {
@@ -65,43 +48,18 @@ export class Square extends base_model {
       }
     }
     );
-
     // BIND POSITION BUFFER
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(normalizedPositions),
-      gl.STATIC_DRAW
-    );
-    gl.vertexAttribPointer(
-      this.positionAttributeLocation,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalizedPositions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(this.positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.positionAttributeLocation);
 
     // BIND COLOR BUFFER
     gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      this.colorAttributeLocation,
-      4,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+    gl.vertexAttribPointer(this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.colorAttributeLocation);
 
-    const error = gl.getError();
-    if (error !== gl.NO_ERROR) {
-      console.error('WebGL Error:', error);
-    }
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 }

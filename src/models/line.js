@@ -1,21 +1,8 @@
 import { base_model } from "./base_model.js";
 
 export class Line extends base_model {
-  constructor(
-    gl,
-    program,
-    positionAttributeLocation,
-    colorAttributeLocation,
-    canvas
-  ) {
-    super(
-      gl,
-      program,
-      positionAttributeLocation,
-      colorAttributeLocation,
-      canvas,
-      "line"
-    );
+  constructor(gl, program, positionAttributeLocation, colorAttributeLocation, canvas) {
+    super(gl, program, positionAttributeLocation, colorAttributeLocation, canvas, "line");
     this.colors = new Float32Array(0);
     for (let i = 0; i < 2; i++) {
       this.colors = new Float32Array([
@@ -52,27 +39,13 @@ export class Line extends base_model {
     // Bind the position buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, normalizedPositions, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      this.positionAttributeLocation,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0
-      );
+    gl.vertexAttribPointer(this.positionAttributeLocation, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray(this.positionAttributeLocation);
     
     // Bind the color buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-      this.colorAttributeLocation,
-      4,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
+    gl.vertexAttribPointer(this.colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.colorAttributeLocation);
     
     gl.clear(gl.COLOR_BUFFER_BIT);
