@@ -73,6 +73,33 @@
       width="600"
       height="400"
     ></canvas>
+    <div class="flex flex-row items-center justify-center space-x-2 mb-4">
+      <div>
+        <input type="range" id="slider-translate-x" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-translate-x" class="block text-center mt-2">Translate X</label>
+      </div>
+      <div>
+        <input type="range" id="slider-translate-y" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-translate-y" class="block text-center mt-2">Translate Y</label>
+      </div>
+      <div>
+        <input type="range" id="slider-transform-x" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-transform-x" class="block text-center mt-2">Transform X</label>
+      </div>
+      <div>
+        <input type="range" id="slider-transform-y" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-transform-y" class="block text-center mt-2">Transform Y</label>
+      </div>
+      <div>
+        <input type="range" id="slider-rotate" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-rotate" class="block text-center mt-2">Rotate</label>
+      </div>
+      <div>
+        <input type="range" id="slider-scale" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <label for="slider-scale" class="block text-center mt-2">Scale</label>
+      </div>
+    </div>
+    
     <script type="module" src="models/line.js"></script>
     <script type="module" src="app.js"></script>
   </body>
