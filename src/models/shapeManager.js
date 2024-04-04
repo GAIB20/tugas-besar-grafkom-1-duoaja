@@ -47,6 +47,9 @@ export class ShapeManager {
         const saveButton = document.getElementById("save");
         saveButton.addEventListener("click", () => this.save());
 
+        const loadButton = document.getElementById("load-model");
+        loadButton.addEventListener("click", () => this.load());
+
         // Color Picker
         this.colorPickerHandler();
 
@@ -304,7 +307,7 @@ export class ShapeManager {
         // Save all shapes in JSON format
         const saveObj = this.shapes.map(shape => {
             return {
-                type: shape.type,
+                type: shape.type.charAt(0).toUpperCase() + shape.type.slice(1),
                 positions: Array.from(shape.positions),
                 colors: Array.from(shape.colors),
             };
@@ -337,6 +340,41 @@ export class ShapeManager {
                 this.activeShape.bindColorBuffer(new Float32Array([r, g, b, 1.0]));
                 this.activeShape.draw();
             }
+            this.updateBuffersAndDraw();
+        });
+    }
+
+    load() {
+        const loadButton = document.getElementById("load-model");
+        loadButton.addEventListener("click", (e) => {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = ".json";
+            fileInput.click();
+            fileInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.loadModel(e.target.result);
+                };
+                reader.readAsText(file);
+            });
+        });
+    }
+
+    loadModel(jsonStr) {
+        this.clearCanvas();
+        const shapes = JSON.parse(jsonStr);
+        console.log("Load shapes", shapes);
+        shapes.forEach(shape => {
+            const newShape = this.createShape(shape.type);
+            newShape.positions = new Float32Array(shape.positions);
+            newShape.colors = new Float32Array(shape.colors);
+            newShape.activate();
+            // add vertex dots
+            addVertexDot(this.canvas, newShape.positions, this.shapes.length);
+            this.setupVertexDotEventListeners(this.shapes.length);
+            this.shapes.push(newShape);
             this.updateBuffersAndDraw();
         });
     }
