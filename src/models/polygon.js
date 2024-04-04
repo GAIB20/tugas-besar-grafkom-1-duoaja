@@ -5,7 +5,7 @@ export class Polygon extends base_model {
     super(gl, program, positionAttributeLocation, colorAttributeLocation, canvas, "polygon");
     this.vertices = [];
     this.colors = new Float32Array(0);
-    this.position = new Float32Array(0);
+    this.positions = new Float32Array(0);
   }
 
   convertVerticesToPosition() {
@@ -14,7 +14,7 @@ export class Polygon extends base_model {
       position.push(this.vertices[i].x);
       position.push(this.vertices[i].y);
     }
-    this.position = new Float32Array(position);
+    this.positions = new Float32Array(position);
   }
 
   handleMouseClick(vertices) {
@@ -33,9 +33,9 @@ export class Polygon extends base_model {
 
   normalizePositions() {
     const positions = [];
-    for (let i = 0; i < this.position.length; i+=2) {
-      const normalizedX = (this.position[i] / this.canvas.clientWidth) * 2 - 1;
-      const normalizedY = (this.position[i+1] / this.canvas.clientHeight) * 2 - 1;
+    for (let i = 0; i < this.positions.length; i+=2) {
+      const normalizedX = (this.positions[i] / this.canvas.clientWidth) * 2 - 1;
+      const normalizedY = (this.positions[i+1] / this.canvas.clientHeight) * 2 - 1;
       positions.push(normalizedX, normalizedY);
     }
     return new Float32Array(positions);
