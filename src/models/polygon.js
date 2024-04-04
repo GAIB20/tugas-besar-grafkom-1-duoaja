@@ -17,36 +17,30 @@ export class Polygon extends base_model {
     this.position = new Float32Array(position);
   }
 
-  handleMouseClick(vertices){
+  handleMouseClick(vertices) {
     this.vertices = vertices;
-    console.log(this.vertices);
     if (this.vertices.length > 2) {
-      this.convertVerticesToPosition();
-      this.customDraw();
+        this.convertVerticesToPosition();
+        this.draw();
     }
   }
 
   draw() {
     if (this.vertices.length > 2) {
       this.customDraw();
-      console.log("Drawing polygon");
     }
-    
   }
 
   normalizePositions() {
     const positions = [];
-    for (let i = 0; i < this.vertices.length; i++) {
-      const x = this.vertices[i].x;
-      const y = this.vertices[i].y;
-      const normalizedX = (x / this.canvas.clientWidth) * 2 - 1;
-      const normalizedY = (y / this.canvas.clientHeight) * 2 - 1;
+    for (let i = 0; i < this.position.length; i+=2) {
+      const normalizedX = (this.position[i] / this.canvas.clientWidth) * 2 - 1;
+      const normalizedY = (this.position[i+1] / this.canvas.clientHeight) * 2 - 1;
       positions.push(normalizedX, normalizedY);
     }
     return new Float32Array(positions);
   }
   
-
   customDraw() {
     const normalizedPositions = this.normalizePositions();
     const positionBuffer = this.gl.createBuffer();
@@ -65,9 +59,11 @@ export class Polygon extends base_model {
 
   bindColorBuffer(colors) {
     if (colors.length === 4) {
-      colors = new Float32Array([
-        ...colors, ...colors, ...colors, ...colors
-      ]);
+      colors = new Float32Array([...colors]);
+
+      for (let i = 0; i < this.vertices.length - 1; i++) {
+        colors = new Float32Array([...colors, ...colors]);
+      }
     }
     this.colors = colors;
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
