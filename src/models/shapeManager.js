@@ -98,11 +98,24 @@ export class ShapeManager {
             const y = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
             this.shapes.forEach(shape => {
                 if (shape.isInside(x, y)) {
+                    // Reset color of other shapes vertex
+                    let vertexDots = document.querySelectorAll('.vertex-dot');
+                    vertexDots.forEach(dot => {
+                        dot.style.backgroundColor = 'black';
+                    });
                     this.activeShape = shape;
                     this.activeShape.toggleDrawMode();
                     this.toggleDrawModeForOtherShapes(shape);
+
+                    // Change color of vertex dot with data-shape-index = this.shapes.indexOf(this.activeShape)
+                    const shapeIndex = this.shapes.indexOf(this.activeShape);
+                    vertexDots = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
+                    vertexDots.forEach(dot => {
+                        dot.style.backgroundColor = 'red';
+                    });
                 }
             });
+
             return;
         }
         if (this.activeType) {
