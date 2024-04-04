@@ -55,6 +55,18 @@ export class ShapeManager {
         select.addEventListener("click", (event) => {
             this.activeType = 'selector';
             this.activeShape = null;
+
+            // get all buttons
+            const selectButton = document.getElementById("selector");
+            selectButton.classList.add('bg-blue-800');
+            const buttons = document.querySelectorAll('.draw-button');
+            buttons.forEach(b => {
+                if (b.id !== 'selector') {
+                    b.classList.remove('bg-blue-800');
+                    b.classList.add('bg-blue-500');
+                    b.classList.add('text-white');
+                }
+            });
         });
     }
 
@@ -65,13 +77,16 @@ export class ShapeManager {
             this.activeType = shapeType;
             this.activeShape = null;
             this.toggleDrawModeForOtherShapes(null);
-            button.style.backgroundColor = "blue";
-            button.style.color = "white";
+            button.classList.add('bg-blue-800');
 
-            const otherButtons = document.querySelectorAll(".draw-button");
-            otherButtons.forEach(otherButton => {
-                if (otherButton !== button) {
-                    otherButton.style.backgroundColor = "white";
+            // get all buttons
+            const buttons = document.querySelectorAll('.draw-button');
+            buttons.forEach(b => {
+                if (b.id !== buttonId) {
+                    // add class bg-blue-500 and text-white
+                    b.classList.remove('bg-blue-800');
+                    b.classList.add('bg-blue-500');
+                    b.classList.add('text-white');
                 }
             });
         });
@@ -117,9 +132,7 @@ export class ShapeManager {
 
             this.setupVertexDotEventListeners(this.shapes.length - 1);
         }
-        this.shapes.forEach(shape => {
-            shape.draw();
-        });
+        this.updateBuffersAndDraw();
     }
 
     // Setup Event Listener for each Vertex
@@ -162,9 +175,7 @@ export class ShapeManager {
             for (let i = 0; i < 4; i++) {
                 currentShape.colors[vertexIndex * 4 + i] = newColor[i];
             }
-            this.shapes.forEach(shape => {
-                shape.draw();
-            });
+            this.updateBuffersAndDraw();
         });
 
         colorPicker.addEventListener('blur', (e) => {
@@ -218,9 +229,7 @@ export class ShapeManager {
             // add new vertex dot
             addVertexDot(this.canvas, currentShape.positions, shapeIndex);
             this.setupVertexDotEventListeners(shapeIndex);
-            this.shapes.forEach(shape => {
-                shape.draw();
-            });
+            this.updateBuffersAndDraw();
         });
         ySlider.addEventListener('input', () => {
             currentShape.positions[vertexIndex * 2 + 1] = parseFloat(ySlider.value);
@@ -229,16 +238,12 @@ export class ShapeManager {
             // add new vertex dot
             addVertexDot(this.canvas, currentShape.positions, shapeIndex);
             this.setupVertexDotEventListeners(shapeIndex);
-            this.shapes.forEach(shape => {
-                shape.draw();
-            });
+            this.updateBuffersAndDraw();
         });
     }
     // Handle mouse move event
     mouseMoveHandler(e) {
-        this.shapes.forEach(shape => {
-            shape.draw();
-        });
+        this.updateBuffersAndDraw();
 
         if (this.activeShape) {
             this.activeShape.mouseMoveHandler(e);
@@ -250,13 +255,6 @@ export class ShapeManager {
         this.shapes.forEach(shape => {
             if (shape !== activeShape) {
                 shape.toggleDrawMode();
-            }
-        });
-        // change button color
-        const otherButtons = document.querySelectorAll(".draw-button");
-        otherButtons.forEach(otherButton => {
-            if (otherButton !== activeShape) {
-                otherButton.style.backgroundColor = "white";
             }
         });
     }
@@ -326,6 +324,13 @@ export class ShapeManager {
                 this.activeShape.bindColorBuffer(new Float32Array([r, g, b, 1.0]));
                 this.activeShape.draw();
             }
+            this.updateBuffersAndDraw();
+        });
+    }
+
+    updateBuffersAndDraw() {
+        this.shapes.forEach(shape => {
+            shape.draw();
         });
     }
 }
