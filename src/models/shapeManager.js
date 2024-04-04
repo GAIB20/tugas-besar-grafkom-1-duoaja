@@ -23,7 +23,7 @@ export class ShapeManager {
         this.lastShearX = 100;
         this.lastShearY = 100;
         this.lastRotate = 180;
-        this.lastScale = 1;
+        this.lastScale = 100;
 
         // Setup mouse event listeners
         this.mouseUpHandler = this.mouseUpHandler.bind(this);
@@ -112,6 +112,12 @@ export class ShapeManager {
         const rotate = document.getElementById("slider-rotate");
         rotate.addEventListener("input", () => {
             this.rotateActiveShape(rotate.value);
+        });
+
+        // Scale
+        const scale = document.getElementById("slider-scale");
+        scale.addEventListener("input", () => {
+            this.scaleActiveShape(scale.value);
         });
   }
 
@@ -540,6 +546,18 @@ export class ShapeManager {
         this.lastRotate = value;
         if (this.activeShape) {
             this.activeShape.positions = ShearManager.rotate(
+                this.activeShape.positions,
+                newValue
+            );
+            this.updateBuffersAndDraw();
+        }
+    }
+
+    scaleActiveShape(value) {
+        const newValue = value - this.lastScale;
+        this.lastScale = value;
+        if (this.activeShape) {
+            this.activeShape.positions = ShearManager.scale(
                 this.activeShape.positions,
                 newValue
             );

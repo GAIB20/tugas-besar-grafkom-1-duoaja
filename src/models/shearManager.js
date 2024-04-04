@@ -31,8 +31,8 @@ class ShearManager {
         });
     }
 
-    static scale(factor) {
-        // TODO
+    static scale(positions, factor) {
+        return positions.map((pos, index) => index % 2 === 0 ? pos + (pos - ShearManager.avgX(positions)) * factor/100 : pos + (pos - ShearManager.avgY(positions)) * factor/100);
     }
 
     static avgX(positions) {
