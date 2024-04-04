@@ -10,12 +10,12 @@ class ShearManager {
         return positions.map((pos, index) => index % 2 === 1 ? pos + value/100 * maxValue : pos);
     }
 
-    static transformX(factor) {
-        // TODO
+    static transformX(positions, factor) {
+        return positions.map((pos, index) => index % 2 === 0 ? pos + (pos - ShearManager.avgX(positions)) * factor/100  : pos);
     }
 
-    static transformY(factor) {
-        // TODO
+    static transformY(positions, factor) {
+        return positions.map((pos, index) => index % 2 === 1 ? pos + (pos - ShearManager.avgY(positions)) * factor/100 : pos);
     }
 
     static rotate(value) {
@@ -24,6 +24,14 @@ class ShearManager {
 
     static scale(factor) {
         // TODO
+    }
+
+    static avgX(positions) {
+        return positions.reduce((acc, pos, index) => index % 2 === 0 ? acc + pos : acc, 0) / (positions.length / 2);
+    }
+
+    static avgY(positions) {
+        return positions.reduce((acc, pos, index) => index % 2 === 1 ? acc + pos : acc, 0) / (positions.length / 2);
     }
 
 }
