@@ -22,7 +22,7 @@ export class ShapeManager {
         this.lastTranslateY = 0;
         this.lastShearX = 100;
         this.lastShearY = 100;
-        this.lastRotate = 0;
+        this.lastRotate = 180;
         this.lastScale = 1;
 
         // Setup mouse event listeners
@@ -107,6 +107,12 @@ export class ShapeManager {
         shearY.addEventListener("input", () => 
             this.shearActiveShapeY(shearY.value)
         );
+
+        // Rotate
+        const rotate = document.getElementById("slider-rotate");
+        rotate.addEventListener("input", () => {
+            this.rotateActiveShape(rotate.value);
+        });
   }
 
     // Create a new shape based on the shape type
@@ -524,6 +530,18 @@ export class ShapeManager {
             this.activeShape.positions = ShearManager.transformY(
                 this.activeShape.positions,
                 newFactor
+            );
+            this.updateBuffersAndDraw();
+        }
+    }
+
+    rotateActiveShape(value) {
+        const newValue = value - this.lastRotate;
+        this.lastRotate = value;
+        if (this.activeShape) {
+            this.activeShape.positions = ShearManager.rotate(
+                this.activeShape.positions,
+                newValue
             );
             this.updateBuffersAndDraw();
         }
