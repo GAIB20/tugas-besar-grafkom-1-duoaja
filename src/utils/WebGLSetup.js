@@ -165,14 +165,14 @@ export function createShape(gl,
         colorLocation,
         canvas
       );
-    // case "polygon":
-    //   return new Polygon(
-    //     gl,
-    //     program,
-    //     positionAttributeLocation,
-    //     colorLocation,
-    //     canvas
-    //   );
+    case "polygon":
+      return new Polygon(
+        gl,
+        program,
+        positionAttributeLocation,
+        colorLocation,
+        canvas
+      );
     default:
       return null;
   }

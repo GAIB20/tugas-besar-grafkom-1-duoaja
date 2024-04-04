@@ -3,7 +3,7 @@ import { Square } from "./square.js";
 import { Rectangle } from "./rectangle.js";
 import { initializeWebGL } from "../utils/WebGLSetup.js";
 import { addVertexDot, hexColorToFloatArray } from "../utils/utils.js";
-// import { Polygon } from "./polygon.js";
+import { Polygon } from "./polygon.js";
 
 export class ShapeManager {
     constructor(canvas) {
@@ -14,6 +14,7 @@ export class ShapeManager {
         this.colorAttributeLocation = colorLocation;
         this.canvas = canvas;
         this.shapes = [];
+        this.vertices = [];
         this.activeShape = null;
 
         // Setup mouse event listeners
@@ -29,6 +30,11 @@ export class ShapeManager {
         this.canvas.addEventListener("mousemove", (e) => {
             this.mouseMoveHandler(e);
         });
+        this.mouseClickHandler = this.mouseClickHandler.bind(this);
+        this.canvas.addEventListener("click", (e) => {
+            this.mouseClickHandler(e);
+        });
+
         /*        
             ====BUTTON EVENT LISTENERS====
         */
@@ -37,7 +43,7 @@ export class ShapeManager {
         this.setupShapeCreation("draw-line", "Line");
         this.setupShapeCreation("draw-square", "Square");
         this.setupShapeCreation("draw-rectangle", "Rectangle");
-        // this.setupShapeCreation("draw-polygon", "Polygon");
+        this.setupShapeCreation("draw-polygon", "Polygon");
 
         // Clear canvas Button
         const clearButton = document.getElementById("clear");
@@ -79,6 +85,7 @@ export class ShapeManager {
         button.addEventListener("click", () => {
             this.activeType = shapeType;
             this.activeShape = null;
+            this.vertices = [];
             this.toggleDrawModeForOtherShapes(null);
             button.classList.add('bg-blue-800');
 
@@ -94,6 +101,21 @@ export class ShapeManager {
             });
         });
     }
+
+    mouseClickHandler(e) {
+        if (this.activeType === 'Polygon') {
+            if (!this.activeShape || this.activeShape.constructor.name !== 'Polygon') {
+                const newShape = this.createShape(this.activeType);
+                this.activeShape = newShape;
+                this.shapes.push(newShape);
+            }
+            const vertexX = e.clientX - this.canvas.offsetLeft;
+            const vertexY = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+            this.vertices.push({ x: vertexX, y: vertexY });
+            this.activeShape.handleMouseClick(this.vertices);
+        }
+    }
+
     // Toggle draw mode for active shape
     mouseDownHandler(e) {
         if (this.activeType === 'selector') {
@@ -285,14 +307,15 @@ export class ShapeManager {
                 return new Square(this.gl, this.program, this.positionAttributeLocation, this.colorAttributeLocation, this.canvas);
             case "Rectangle":
                 return new Rectangle(this.gl, this.program, this.positionAttributeLocation, this.colorAttributeLocation, this.canvas);
-            // case "Polygon":
-            //     return new Polygon(this.gl, this.program, this.positionAttributeLocation, this.colorAttributeLocation, this.canvas);
+            case "Polygon":
+                return new Polygon(this.gl, this.program, this.positionAttributeLocation, this.colorAttributeLocation, this.canvas);
         }
     }
 
     // Listener for clearing the canvas from clear button
     clearCanvas() {
         this.shapes = [];
+        this.vertices = [];
         this.activeShape = null;
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         // remove all vertex dots
