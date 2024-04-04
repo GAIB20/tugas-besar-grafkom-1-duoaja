@@ -95,9 +95,23 @@
         <label for="slider-rotate" class="block text-center mt-2">Rotate</label>
       </div>
       <div>
-        <input type="range" id="slider-scale" class="slider mt-4" min="-100" max="100" value="0" step="1">
+        <input type="range" id="slider-scale" class="slider mt-4" min="0" max="250" value="100" step="1">
         <label for="slider-scale" class="block text-center mt-2">Scale</label>
       </div>
+    </div>
+    <div>
+      <button
+        id="reflect-x"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        Reflect X
+      </button>
+      <button
+        id="reflect-y"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        Reflect Y
+      </button>
     </div>
     
     <script type="module" src="models/line.js"></script>

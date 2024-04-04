@@ -35,6 +35,30 @@ class ShearManager {
         return positions.map((pos, index) => index % 2 === 0 ? pos + (pos - ShearManager.avgX(positions)) * factor/100 : pos + (pos - ShearManager.avgY(positions)) * factor/100);
     }
 
+    static reflection(positions, axis) {
+        if (axis) {
+            return ShearManager.reflectX(positions);
+        } else {
+            return ShearManager.reflectY(positions);
+        }
+    }
+
+    static reflectX(positions) {
+        return positions.map((pos, index) => index % 2 === 0 ? pos : pos - 2 * (pos - ShearManager.middleX(positions)));
+    }
+
+    static reflectY(positions) {
+        return positions.map((pos, index) => index % 2 === 1 ? pos : pos - 2 * (pos - ShearManager.middleY(positions)));
+    }
+
+    static middleX(positions) {
+        return (Math.max(...positions.filter((pos, index) => index % 2 === 0)) + Math.min(...positions.filter((pos, index) => index % 2 === 0))) / 2;
+    }
+
+    static middleY(positions) {
+        return (Math.max(...positions.filter((pos, index) => index % 2 === 1)) + Math.min(...positions.filter((pos, index) => index % 2 === 1))) / 2;
+    }
+
     static avgX(positions) {
         return positions.reduce((acc, pos, index) => index % 2 === 0 ? acc + pos : acc, 0) / (positions.length / 2);
     }

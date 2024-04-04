@@ -119,6 +119,18 @@ export class ShapeManager {
         scale.addEventListener("input", () => {
             this.scaleActiveShape(scale.value);
         });
+
+        // Reflection
+        const reflectionX = document.getElementById("reflect-x");
+        reflectionX.addEventListener("click", () => {
+            this.reflectionActiveShape(0);
+        });
+
+        const reflectionY = document.getElementById("reflect-y");
+        reflectionY.addEventListener("click", () => {
+            this.reflectionActiveShape(1);
+        });
+        
   }
 
     // Create a new shape based on the shape type
@@ -560,6 +572,16 @@ export class ShapeManager {
             this.activeShape.positions = ShearManager.scale(
                 this.activeShape.positions,
                 newValue
+            );
+            this.updateBuffersAndDraw();
+        }
+    }
+
+    reflectionActiveShape(axis) {
+        if (this.activeShape) {
+            this.activeShape.positions = ShearManager.reflection(
+                this.activeShape.positions,
+                axis
             );
             this.updateBuffersAndDraw();
         }
