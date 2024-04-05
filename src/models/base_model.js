@@ -65,7 +65,6 @@ export class base_model {
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.colors), this.gl.STATIC_DRAW);
-    console.log("redraw");
 
     // re-create the vertex dots
     this.addVertexDot();

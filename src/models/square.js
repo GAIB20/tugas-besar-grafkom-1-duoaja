@@ -61,7 +61,6 @@ export class Square extends base_model {
       [y2, y3] = [y3, y2];
     }
     const isInside = (x > x2 && x < x3) && (y > y2 && y < y3);
-    console.log("isInside", isInside);
     return isInside;
   }
   bindColorBuffer(colors) {

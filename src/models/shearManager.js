@@ -14,6 +14,8 @@ class ShearManager {
         var newIndex = index;
         if (positions.length === 8){
             newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        } else if (positions.length === 4){
+            newIndex = index === 0 ? 1 : 0;
         }
         const factor = value / 100;
         const anchor = positions[newIndex * 2];
@@ -24,6 +26,8 @@ class ShearManager {
         var newIndex = index;
         if (positions.length === 8){
             newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        } else if (positions.length === 4){
+            newIndex = index === 0 ? 1 : 0;
         }        
         const factor = value / 100;
         const anchor = positions[newIndex * 2 + 1];

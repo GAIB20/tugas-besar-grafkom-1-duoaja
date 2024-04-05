@@ -231,7 +231,6 @@ export class ShapeManager {
       this.activeShape.colors.set(temp);
       this.activeShape.colors.set([r, g, b, 1], temp.length);
 
-      console.log(this.activeShape.colors);
 
       const vertexX = e.clientX - this.canvas.offsetLeft;
       const vertexY =
@@ -268,7 +267,6 @@ export class ShapeManager {
   // Toggle draw mode for active shape
   mouseDownHandler(e) {
     if (this.activeType !== "Polygon") {
-      console.log(this.activeType);
       if (this.activeType === "selector") {
         const x = e.clientX - this.canvas.offsetLeft;
         const y = this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
@@ -320,15 +318,20 @@ export class ShapeManager {
     if (this.activeType !== "Polygon") {
       if (this.activeShape && this.activeType !== "selector") {
         this.activeShape.mouseUpHandler(e);
-        addVertexDot(
-          this.canvas,
-          this.activeShape.positions,
-          this.shapes.indexOf(this.activeShape)
-        );
-        // setup for vertex with data-shape-index = this.shapes.length - 1
-        this.changeVertexColor(this.shapes.indexOf(this.activeShape));
-        console.log("CHANGE COLOR FOR", this.shapes.indexOf(this.activeShape));
-        this.setupVertexDotEventListeners(this.shapes.length - 1);
+        if (this.activeShape.positions.length > 0) {
+          if (Math.abs(this.activeShape.positions[0] - this.activeShape.positions[2]) < 10 && Math.abs(this.activeShape.positions[1] - this.activeShape.positions[3]) < 10) {
+            this.shapes.pop();
+          } else {
+            addVertexDot(
+              this.canvas,
+              this.activeShape.positions,
+              this.shapes.indexOf(this.activeShape)
+            );
+            // setup for vertex with data-shape-index = this.shapes.length - 1
+            this.changeVertexColor(this.shapes.indexOf(this.activeShape));
+            this.setupVertexDotEventListeners(this.shapes.length - 1);
+          }
+        }
       }
       this.updateBuffersAndDraw();
     }
@@ -346,7 +349,6 @@ export class ShapeManager {
         const shapeIndex = parseInt(dot.getAttribute("data-shape-index"));
         this.activeShape = this.shapes[shapeIndex];
         this.showColorPicker(vertexIndex, shapeIndex);
-        console.log("SHOW TRANSLATION BARS", vertexIndex, shapeIndex);
         this.currentVertexIndex = vertexIndex;
         this.currentShapeIndex = shapeIndex;
         this.showTranslationBars();
@@ -480,7 +482,6 @@ export class ShapeManager {
       };
     });
     const jsonStr = JSON.stringify(saveObj);
-    console.log(jsonStr);
 
     // Create a blob and download the JSON file
     const blob = new Blob([jsonStr], { type: "application/json" });
@@ -532,7 +533,6 @@ export class ShapeManager {
   loadModel(jsonStr) {
     this.clearCanvas();
     const shapes = JSON.parse(jsonStr);
-    console.log("Load shapes", shapes);
     shapes.forEach((shape) => {
       const newShape = this.createShape(shape.type);
       newShape.positions = new Float32Array(shape.positions);
@@ -581,7 +581,6 @@ export class ShapeManager {
   }
 
   translateSingleVertexX(dx, vertexIndex, shapeIndex) {
-    console.log("TRANSLATE SINGLE X", dx, vertexIndex, shapeIndex);
     const newDx = dx - this.lastSingleTranslateX;
     this.lastSingleTranslateX = dx;
     const currentShape = this.shapes[shapeIndex];
@@ -597,7 +596,6 @@ export class ShapeManager {
   }
 
   translateSingleVertexY(dy, vertexIndex, shapeIndex) {
-    console.log("TRANSLATE SINGLE Y", dy, vertexIndex, shapeIndex)
     const newDy = dy - this.lastSingleTranslateY;
     this.lastSingleTranslateY = dy;
     const currentShape = this.shapes[shapeIndex];
