@@ -29,7 +29,7 @@ export class Polygon extends base_model {
   }
 
   draw() {
-    if (this.vertices.length > 2) {
+    if (this.vertices.length > 2 || this.positions.length > 4) {
       this.customDraw();
     }
   }
@@ -57,7 +57,7 @@ export class Polygon extends base_model {
     this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.colorAttributeLocation);
 
-    this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.vertices.length);
+    this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.positions.length/2);
   }
 
   isInside() {
@@ -68,7 +68,7 @@ export class Polygon extends base_model {
     if (colors.length === 4) {
       colors = new Float32Array([...colors]);
 
-      for (let i = 0; i < this.vertices.length - 1; i++) {
+      for (let i = 0; i < this.positions.length/2 - 1; i++) {
         colors = new Float32Array([...colors, ...colors]);
       }
     }
