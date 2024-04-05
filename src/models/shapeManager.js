@@ -214,20 +214,23 @@ export class ShapeManager {
   }
 
   updateDotPosition() {
-    const shapeIndex = this.shapes.indexOf(this.activeShape);
-    const vertexShape = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
-        vertexShape.forEach(dot => {
-            dot.remove();
-        });
+    if (this.activeShape){
+      const shapeIndex = this.shapes.indexOf(this.activeShape);
+      const vertexShape = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
+          vertexShape.forEach(dot => {
+              dot.remove();
+          });
 
-      addVertexDot(
-        this.canvas,
-        this.activeShape.positions,
-        this.shapes.length - 1
-      );
+        addVertexDot(
+          this.canvas,
+          this.activeShape.positions,
+          this.shapes.length - 1,
+          this.shapes.indexOf(this.activeShape)
+        );
 
-      this.setupVertexDotEventListeners(this.shapes.length - 1);
-    }
+        this.setupVertexDotEventListeners(this.shapes.length - 1);
+      }
+  }
 
   // Toggle draw mode for active shape
   mouseDownHandler(e) {
@@ -287,7 +290,8 @@ export class ShapeManager {
         addVertexDot(
           this.canvas,
           this.activeShape.positions,
-          this.shapes.length - 1
+          this.shapes.length - 1,
+          this.shapes.indexOf(this.activeShape)
         );
         // setup for vertex with data-shape-index = this.shapes.length - 1
 
@@ -349,6 +353,11 @@ export class ShapeManager {
 
   // Slider for change vertex position
   showTranslationBars(vertexIndex, shapeIndex) {
+
+    if (!this.activeShape){
+      return;
+    }
+
     const currentShape = this.shapes[shapeIndex];
 
     // translate and transform congurence
@@ -371,7 +380,7 @@ export class ShapeManager {
       .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
       .forEach((dot) => dot.remove());
     // add new vertex dot
-    addVertexDot(this.canvas, currentShape.positions, shapeIndex);
+    addVertexDot(this.canvas, currentShape.positions, shapeIndex, this.shapes.indexOf(this.activeShape));
     this.setupVertexDotEventListeners(shapeIndex);
     this.updateBuffersAndDraw();
   }
@@ -514,7 +523,7 @@ export class ShapeManager {
       newShape.colors = new Float32Array(shape.colors);
       newShape.activate();
       // add vertex dots
-      addVertexDot(this.canvas, newShape.positions, this.shapes.length);
+      addVertexDot(this.canvas, newShape.positions, this.shapes.length, this.shapes.indexOf(this.activeShape));
       this.setupVertexDotEventListeners(this.shapes.length);
       this.shapes.push(newShape);
       this.updateBuffersAndDraw();

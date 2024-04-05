@@ -5,7 +5,7 @@ export function hexColorToFloatArray(hexColor) {
     return { r, g, b };
 }
 
-export function addVertexDot(canvas, positions, shapeIndex) {
+export function addVertexDot(canvas, positions, shapeIndex, currentActiveShapeIndex) {
     const canvasRect = canvas.getBoundingClientRect();
     positions.forEach((pos, i) => {
         if (i % 2 === 0) {
@@ -17,6 +17,9 @@ export function addVertexDot(canvas, positions, shapeIndex) {
             dot.style.width = '7px';
             dot.style.height = '7px';
             dot.style.backgroundColor = 'black';
+            if (shapeIndex === currentActiveShapeIndex) {
+                dot.style.backgroundColor = 'red';;
+            }
             dot.style.borderRadius = '50%';
 
             const dotX = canvasRect.left + window.scrollX + pos;
