@@ -23,13 +23,13 @@ export class Polygon extends base_model {
     this.vertices = convexHull(this.vertices);
     this.convertVerticesToPosition();
 
-    if (this.vertices.length > 2) {
+    if (this.vertices.length > 1) {
       this.draw();
     }
   }
 
   draw() {
-    if (this.vertices.length > 2 || this.positions.length > 4) {
+    if (this.vertices.length > 1 || this.positions.length > 2) {
       this.customDraw();
     }
   }
@@ -57,7 +57,11 @@ export class Polygon extends base_model {
     this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.colorAttributeLocation);
 
-    this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.positions.length/2);
+    if (this.positions.length === 4) {
+      this.gl.drawArrays(this.gl.LINE_LOOP, 0, this.positions.length/2);
+    } else {
+      this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.positions.length/2);
+    }
   }
 
   isInside() {
