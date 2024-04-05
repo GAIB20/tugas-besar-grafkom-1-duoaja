@@ -362,6 +362,11 @@ export class ShapeManager {
       this.translateSingleVertexY(translateY.value, vertexIndex, shapeIndex);
     });
 
+    const congurence = document.getElementById("slider-congruence");
+    congurence.addEventListener("input", () => {
+      this.congurenceSingleVertex(congurence.value, vertexIndex, shapeIndex);
+    });
+
     document
       .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
       .forEach((dot) => dot.remove());
@@ -589,6 +594,26 @@ export class ShapeManager {
       this.updateBuffersAndDraw();
     }
     this.updateDotPosition();
+  }
+
+  congurenceSingleVertex(value, vertexIndex, shapeIndex) {
+    const currentShape = this.shapes[shapeIndex];
+    const newDx = value - this.lastDrag;
+    this.lastDrag = value;
+    currentShape.positions = ShearManager.translateSingleX(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientWidth / 2,
+      vertexIndex
+    );
+    currentShape.positions = ShearManager.translateSingleY(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientHeight / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
   }
 
   shearActiveShapeY(factor) {
