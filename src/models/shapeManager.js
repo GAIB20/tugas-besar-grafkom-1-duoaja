@@ -24,6 +24,9 @@ export class ShapeManager {
     this.lastShearY = 100;
     this.lastRotate = 180;
     this.lastScale = 100;
+    this.lastDrag = 100;
+    this.lastSingleTranslateX = 0;
+    this.lastSingleTranslateY = 0;
 
     // Setup mouse event listeners
     this.mouseUpHandler = this.mouseUpHandler.bind(this);
@@ -211,20 +214,23 @@ export class ShapeManager {
   }
 
   updateDotPosition() {
-    const shapeIndex = this.shapes.indexOf(this.activeShape);
-    const vertexShape = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
-        vertexShape.forEach(dot => {
-            dot.remove();
-        });
+    if (this.activeShape){
+      const shapeIndex = this.shapes.indexOf(this.activeShape);
+      const vertexShape = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
+          vertexShape.forEach(dot => {
+              dot.remove();
+          });
 
-      addVertexDot(
-        this.canvas,
-        this.activeShape.positions,
-        this.shapes.length - 1
-      );
+        addVertexDot(
+          this.canvas,
+          this.activeShape.positions,
+          this.shapes.length - 1,
+          this.shapes.indexOf(this.activeShape)
+        );
 
-      this.setupVertexDotEventListeners(this.shapes.length - 1);
-    }
+        this.setupVertexDotEventListeners(this.shapes.length - 1);
+      }
+  }
 
   // Toggle draw mode for active shape
   mouseDownHandler(e) {
@@ -284,7 +290,8 @@ export class ShapeManager {
         addVertexDot(
           this.canvas,
           this.activeShape.positions,
-          this.shapes.length - 1
+          this.shapes.length - 1,
+          this.shapes.indexOf(this.activeShape)
         );
         // setup for vertex with data-shape-index = this.shapes.length - 1
 
@@ -346,65 +353,36 @@ export class ShapeManager {
 
   // Slider for change vertex position
   showTranslationBars(vertexIndex, shapeIndex) {
-    const currentShape = this.shapes[shapeIndex];
 
-    const existingUI = document.getElementById("translation-ui");
-    if (existingUI) {
-      existingUI.remove();
+    if (!this.activeShape){
+      return;
     }
 
-    const uiContainer = document.createElement("div");
-    uiContainer.id = "translation-ui";
-    uiContainer.style.position = "absolute";
-    uiContainer.style.left = `${150}px`;
-    uiContainer.style.top = `${100}px`;
-    document.body.appendChild(uiContainer);
+    const currentShape = this.shapes[shapeIndex];
 
-    // Create X-axis slider
-    const xSlider = document.createElement("input");
-    xSlider.type = "range";
-    xSlider.min = "0";
-    xSlider.max = this.canvas.clientWidth.toString();
-    xSlider.value = currentShape.positions[vertexIndex * 2].toString();
-    uiContainer.appendChild(xSlider);
-
-    // Create Y-axis slider
-    const ySlider = document.createElement("input");
-    ySlider.type = "range";
-    ySlider.min = "0";
-    ySlider.max = this.canvas.clientHeight.toString();
-    ySlider.value = currentShape.positions[vertexIndex * 2 + 1].toString();
-    uiContainer.appendChild(ySlider);
-
-    // Create a button to remove the UI
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.addEventListener("click", () => uiContainer.remove());
-    uiContainer.appendChild(removeButton);
-
-    // Slider event listeners to update vertex position
-    xSlider.addEventListener("input", () => {
-      currentShape.positions[vertexIndex * 2] = parseFloat(xSlider.value);
-      // remove the vertex dot with data-shape-index = shapeIndex
-      document
-        .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
-        .forEach((dot) => dot.remove());
-      // add new vertex dot
-      addVertexDot(this.canvas, currentShape.positions, shapeIndex);
-      this.setupVertexDotEventListeners(shapeIndex);
-      this.updateBuffersAndDraw();
+    // translate and transform congurence
+    const translateX = document.getElementById("slider-translate-x-single");
+    translateX.addEventListener("input", () => {
+      this.translateSingleVertexX(translateX.value, vertexIndex, shapeIndex);
     });
-    ySlider.addEventListener("input", () => {
-      currentShape.positions[vertexIndex * 2 + 1] = parseFloat(ySlider.value);
-      // remove the vertex dot with data-shape-index = shapeIndex
-      document
-        .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
-        .forEach((dot) => dot.remove());
-      // add new vertex dot
-      addVertexDot(this.canvas, currentShape.positions, shapeIndex);
-      this.setupVertexDotEventListeners(shapeIndex);
-      this.updateBuffersAndDraw();
+
+    const translateY = document.getElementById("slider-translate-y-single");
+    translateY.addEventListener("input", () => {
+      this.translateSingleVertexY(translateY.value, vertexIndex, shapeIndex);
     });
+
+    const congurence = document.getElementById("slider-congruence");
+    congurence.addEventListener("input", () => {
+      this.congurenceSingleVertex(congurence.value, vertexIndex, shapeIndex);
+    });
+
+    document
+      .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
+      .forEach((dot) => dot.remove());
+    // add new vertex dot
+    addVertexDot(this.canvas, currentShape.positions, shapeIndex, this.shapes.indexOf(this.activeShape));
+    this.setupVertexDotEventListeners(shapeIndex);
+    this.updateBuffersAndDraw();
   }
   // Handle mouse move event
   mouseMoveHandler(e) {
@@ -545,7 +523,7 @@ export class ShapeManager {
       newShape.colors = new Float32Array(shape.colors);
       newShape.activate();
       // add vertex dots
-      addVertexDot(this.canvas, newShape.positions, this.shapes.length);
+      addVertexDot(this.canvas, newShape.positions, this.shapes.length, this.shapes.indexOf(this.activeShape));
       this.setupVertexDotEventListeners(this.shapes.length);
       this.shapes.push(newShape);
       this.updateBuffersAndDraw();
@@ -586,6 +564,36 @@ export class ShapeManager {
     this.updateDotPosition();
   }
 
+  translateSingleVertexX(dx, vertexIndex, shapeIndex) {
+    const newDx = dx - this.lastSingleTranslateX;
+    this.lastSingleTranslateX = dx;
+    const currentShape = this.shapes[shapeIndex];
+    currentShape.positions = ShearManager.translateSingleX(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientWidth / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
+    this.updateDotPosition();
+  }
+
+  translateSingleVertexY(dy, vertexIndex, shapeIndex) {
+    const newDy = dy - this.lastSingleTranslateY;
+    this.lastSingleTranslateY = dy;
+    const currentShape = this.shapes[shapeIndex];
+    currentShape.positions = ShearManager.translateSingleY(
+      currentShape.positions,
+      newDy,
+      this.canvas.clientHeight / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
+    this.updateDotPosition();
+  }
+
   shearActiveShapeX(factor) {
     const newFactor = factor - this.lastShearX;
     this.lastShearX = factor;
@@ -596,6 +604,28 @@ export class ShapeManager {
       );
       this.updateBuffersAndDraw();
     }
+    this.updateDotPosition();
+    this.updateDotPosition();
+  }
+
+  congurenceSingleVertex(value, vertexIndex, shapeIndex) {
+    const currentShape = this.shapes[shapeIndex];
+    const newDx = value - this.lastDrag;
+    this.lastDrag = value;
+    currentShape.positions = ShearManager.translateSingleX(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientWidth / 2,
+      vertexIndex
+    );
+    currentShape.positions = ShearManager.translateSingleY(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientHeight / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
     this.updateDotPosition();
   }
 

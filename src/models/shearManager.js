@@ -10,6 +10,26 @@ class ShearManager {
         return positions.map((pos, index) => index % 2 === 1 ? pos + value/100 * maxValue : pos);
     }
 
+    static translateSingleX(positions, value, maxValue, index) {
+        var newIndex = index;
+        if (positions.length === 8){
+            newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        }
+        const factor = value / 100;
+        const anchor = positions[newIndex * 2];
+        return positions.map((pos, i) => i % 2 === 0 ? pos + (pos - anchor) * factor : pos);
+    }
+
+    static translateSingleY(positions, value, maxValue, index) {
+        var newIndex = index;
+        if (positions.length === 8){
+            newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        }        
+        const factor = value / 100;
+        const anchor = positions[newIndex * 2 + 1];
+        return positions.map((pos, i) => i % 2 === 1 ? pos + (pos - anchor) * factor : pos);
+    }
+
     static transformX(positions, factor) {
         return positions.map((pos, index) => index % 2 === 0 ? pos + (pos - ShearManager.avgX(positions)) * factor/100  : pos);
     }
