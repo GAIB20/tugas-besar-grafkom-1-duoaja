@@ -27,6 +27,8 @@ export class ShapeManager {
     this.lastDrag = 100;
     this.lastSingleTranslateX = 0;
     this.lastSingleTranslateY = 0;
+    this.currentVertexIndex = null;
+    this.currentShapeIndex = null;
 
     // Setup mouse event listeners
     this.mouseUpHandler = this.mouseUpHandler.bind(this);
@@ -91,15 +93,34 @@ export class ShapeManager {
 
     // Translation
     const translateX = document.getElementById("slider-translate-x");
-    translateX.addEventListener("input", () =>
-      this.translateActiveShapeX(translateX.value)
-    );
+    translateX.addEventListener("input", () => {
+      this.translateActiveShapeX(translateX.value);
+    });
 
     const translateY = document.getElementById("slider-translate-y");
-    translateY.addEventListener("input", () =>
-      this.translateActiveShapeY(translateY.value)
-    );
+    translateY.addEventListener("input", () => {
+      this.translateActiveShapeY(translateY.value);
+    });
 
+    const translateSingleX = document.getElementById("slider-translate-x-single");
+    translateSingleX.addEventListener("input", () => {
+      if (this.activeShape) {
+        this.translateSingleVertexX(translateSingleX.value, this.currentVertexIndex, this.currentShapeIndex);
+      }
+    });
+
+    const translateSingleY = document.getElementById("slider-translate-y-single");
+    translateSingleY.addEventListener("input", () => {
+      if (this.activeShape) {
+        this.translateSingleVertexY(translateSingleY.value, this.currentVertexIndex, this.currentShapeIndex);
+      }
+    });
+    const congurence = document.getElementById("slider-congruence");
+    congurence.addEventListener("input", () => {
+      if (this.activeShape) {
+        this.congurenceSingleVertex(congurence.value, this.currentVertexIndex, this.currentShapeIndex);
+      }
+    });
     // Shear
     const shearX = document.getElementById("slider-transform-x");
     shearX.addEventListener("input", () =>
@@ -134,7 +155,19 @@ export class ShapeManager {
       this.reflectionActiveShape(1);
     });
   }
-
+  changeVertexColor(shapeIndex) {
+    // change if vertex is not active
+    const vertexDots = document.querySelectorAll(".vertex-dot");
+    vertexDots.forEach((dot) => {
+      dot.style.backgroundColor = "black";
+    });
+    const vertexDotsActive = document.querySelectorAll(
+      `.vertex-dot[data-shape-index="${shapeIndex}"]`
+    );
+    vertexDotsActive.forEach((dot) => {
+      dot.style.backgroundColor = "red";
+    });
+  }
   // Create a new shape based on the shape type
   setupShapeCreation(buttonId, shapeType) {
     if (buttonId === "draw-polygon") {
@@ -145,6 +178,7 @@ export class ShapeManager {
         this.activeShape = newShape;
         this.activeType = shapeType;
         this.vertices = [];
+        this.changeVertexColor(this.shapes.indexOf(this.activeShape));
         this.toggleDrawModeForOtherShapes(newShape);
         this.shapes.push(newShape);
 
@@ -186,27 +220,27 @@ export class ShapeManager {
 
   mouseClickHandler(e) {
     if (this.activeType === "Polygon") {
-      
+
       const colorPicker = document.getElementById("colorPicker");
       const colorHex = colorPicker.value;
       const { r, g, b } = hexColorToFloatArray(colorHex);
-      
+
       const temp = this.activeShape.colors;
       this.activeShape.colors = new Float32Array(this.activeShape.colors.length + 4);
-      
+
       this.activeShape.colors.set(temp);
       this.activeShape.colors.set([r, g, b, 1], temp.length);
-      
+
       console.log(this.activeShape.colors);
 
       const vertexX = e.clientX - this.canvas.offsetLeft;
       const vertexY =
-      this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
-      
+        this.canvas.clientHeight - e.clientY + this.canvas.offsetTop;
+
       this.vertices.push({ x: vertexX, y: vertexY });
-      
+
       this.activeShape.handleMouseClick(this.vertices);
-      
+
       this.updateDotPosition();
 
       this.updateBuffersAndDraw();
@@ -214,22 +248,21 @@ export class ShapeManager {
   }
 
   updateDotPosition() {
-    if (this.activeShape){
+    if (this.activeShape) {
       const shapeIndex = this.shapes.indexOf(this.activeShape);
       const vertexShape = document.querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`);
-          vertexShape.forEach(dot => {
-              dot.remove();
-          });
-
-        addVertexDot(
-          this.canvas,
-          this.activeShape.positions,
-          this.shapes.length - 1,
-          this.shapes.indexOf(this.activeShape)
-        );
-
-        this.setupVertexDotEventListeners(this.shapes.length - 1);
-      }
+      vertexShape.forEach(dot => {
+        dot.remove();
+      });
+      addVertexDot(
+        this.canvas,
+        this.activeShape.positions,
+        this.shapes.indexOf(this.activeShape)
+      );
+      this.setupVertexDotEventListeners(this.shapes.indexOf(this.activeShape));
+      this.changeVertexColor(this.shapes.indexOf(this.activeShape));
+      this.setupVertexDotEventListeners(this.shapes.length - 1);
+    }
   }
 
   // Toggle draw mode for active shape
@@ -247,6 +280,7 @@ export class ShapeManager {
               dot.style.backgroundColor = "black";
             });
             this.activeShape = shape;
+            this.changeVertexColor(this.shapes.indexOf(this.activeShape));
             this.activeShape.toggleDrawMode();
             this.toggleDrawModeForOtherShapes(shape);
 
@@ -268,7 +302,6 @@ export class ShapeManager {
       const newShape = this.createShape(this.activeType);
       newShape.activate();
       this.activeShape = newShape;
-
       // get color from color picker
       const colorPicker = document.getElementById("colorPicker");
       const colorHex = colorPicker.value;
@@ -290,11 +323,11 @@ export class ShapeManager {
         addVertexDot(
           this.canvas,
           this.activeShape.positions,
-          this.shapes.length - 1,
           this.shapes.indexOf(this.activeShape)
         );
         // setup for vertex with data-shape-index = this.shapes.length - 1
-
+        this.changeVertexColor(this.shapes.indexOf(this.activeShape));
+        console.log("CHANGE COLOR FOR", this.shapes.indexOf(this.activeShape));
         this.setupVertexDotEventListeners(this.shapes.length - 1);
       }
       this.updateBuffersAndDraw();
@@ -311,8 +344,13 @@ export class ShapeManager {
       dot.addEventListener("click", (e) => {
         const vertexIndex = parseInt(dot.getAttribute("data-vertex-index"));
         const shapeIndex = parseInt(dot.getAttribute("data-shape-index"));
+        this.activeShape = this.shapes[shapeIndex];
         this.showColorPicker(vertexIndex, shapeIndex);
-        this.showTranslationBars(vertexIndex, shapeIndex);
+        console.log("SHOW TRANSLATION BARS", vertexIndex, shapeIndex);
+        this.currentVertexIndex = vertexIndex;
+        this.currentShapeIndex = shapeIndex;
+        this.showTranslationBars();
+        this.changeVertexColor(shapeIndex);
       });
     });
   }
@@ -345,43 +383,21 @@ export class ShapeManager {
       }
       this.updateBuffersAndDraw();
     });
-
-    colorPicker.addEventListener("blur", (e) => {
-      colorPicker.remove();
-    });
   }
 
-  // Slider for change vertex position
-  showTranslationBars(vertexIndex, shapeIndex) {
-
-    if (!this.activeShape){
+  showTranslationBars() {
+    if (!this.activeShape) {
       return;
     }
 
-    const currentShape = this.shapes[shapeIndex];
-
-    // translate and transform congurence
-    const translateX = document.getElementById("slider-translate-x-single");
-    translateX.addEventListener("input", () => {
-      this.translateSingleVertexX(translateX.value, vertexIndex, shapeIndex);
-    });
-
-    const translateY = document.getElementById("slider-translate-y-single");
-    translateY.addEventListener("input", () => {
-      this.translateSingleVertexY(translateY.value, vertexIndex, shapeIndex);
-    });
-
-    const congurence = document.getElementById("slider-congruence");
-    congurence.addEventListener("input", () => {
-      this.congurenceSingleVertex(congurence.value, vertexIndex, shapeIndex);
-    });
+    const currentShape = this.shapes[this.currentShapeIndex];
 
     document
-      .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
+      .querySelectorAll(`.vertex-dot[data-shape-index="${this.currentShapeIndex}"]`)
       .forEach((dot) => dot.remove());
     // add new vertex dot
-    addVertexDot(this.canvas, currentShape.positions, shapeIndex, this.shapes.indexOf(this.activeShape));
-    this.setupVertexDotEventListeners(shapeIndex);
+    addVertexDot(this.canvas, currentShape.positions, this.currentShapeIndex);
+    this.setupVertexDotEventListeners(this.currentShapeIndex);
     this.updateBuffersAndDraw();
   }
   // Handle mouse move event
@@ -523,7 +539,7 @@ export class ShapeManager {
       newShape.colors = new Float32Array(shape.colors);
       newShape.activate();
       // add vertex dots
-      addVertexDot(this.canvas, newShape.positions, this.shapes.length, this.shapes.indexOf(this.activeShape));
+      addVertexDot(this.canvas, newShape.positions, this.shapes.length);
       this.setupVertexDotEventListeners(this.shapes.length);
       this.shapes.push(newShape);
       this.updateBuffersAndDraw();
@@ -565,6 +581,7 @@ export class ShapeManager {
   }
 
   translateSingleVertexX(dx, vertexIndex, shapeIndex) {
+    console.log("TRANSLATE SINGLE X", dx, vertexIndex, shapeIndex);
     const newDx = dx - this.lastSingleTranslateX;
     this.lastSingleTranslateX = dx;
     const currentShape = this.shapes[shapeIndex];
@@ -580,6 +597,7 @@ export class ShapeManager {
   }
 
   translateSingleVertexY(dy, vertexIndex, shapeIndex) {
+    console.log("TRANSLATE SINGLE Y", dy, vertexIndex, shapeIndex)
     const newDy = dy - this.lastSingleTranslateY;
     this.lastSingleTranslateY = dy;
     const currentShape = this.shapes[shapeIndex];
