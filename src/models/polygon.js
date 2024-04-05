@@ -19,8 +19,10 @@ export class Polygon extends base_model {
 
   handleMouseClick(vertices) {
     this.vertices = vertices;
+    this.convertVerticesToPosition();
     if (this.vertices.length > 2) {
-        this.convertVerticesToPosition();
+        console.log("Drawing polygon")
+        console.log(this.positions)
         this.draw();
     }
   }
@@ -55,6 +57,10 @@ export class Polygon extends base_model {
     this.gl.enableVertexAttribArray(this.colorAttributeLocation);
 
     this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.vertices.length);
+  }
+
+  isInside(){
+    return true;
   }
 
   bindColorBuffer(colors) {
