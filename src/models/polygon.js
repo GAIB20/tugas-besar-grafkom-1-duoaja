@@ -1,3 +1,4 @@
+import { convexHull } from "../utils/utils.js";
 import { base_model } from "./base_model.js";
 
 export class Polygon extends base_model {
@@ -19,11 +20,11 @@ export class Polygon extends base_model {
 
   handleMouseClick(vertices) {
     this.vertices = vertices;
+    this.vertices = convexHull(this.vertices);
     this.convertVerticesToPosition();
+
     if (this.vertices.length > 2) {
-        console.log("Drawing polygon")
-        console.log(this.positions)
-        this.draw();
+      this.draw();
     }
   }
 
@@ -35,23 +36,23 @@ export class Polygon extends base_model {
 
   normalizePositions() {
     const positions = [];
-    for (let i = 0; i < this.positions.length; i+=2) {
+    for (let i = 0; i < this.positions.length; i += 2) {
       const normalizedX = (this.positions[i] / this.canvas.clientWidth) * 2 - 1;
-      const normalizedY = (this.positions[i+1] / this.canvas.clientHeight) * 2 - 1;
+      const normalizedY = (this.positions[i + 1] / this.canvas.clientHeight) * 2 - 1;
       positions.push(normalizedX, normalizedY);
     }
     return new Float32Array(positions);
   }
-  
+
   customDraw() {
     const normalizedPositions = this.normalizePositions();
     const positionBuffer = this.gl.createBuffer();
-    
+
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(normalizedPositions), this.gl.STATIC_DRAW);
     this.gl.vertexAttribPointer(this.positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.positionAttributeLocation);
-    
+
     this.bindColorBuffer(this.colors);
     this.gl.vertexAttribPointer(this.colorAttributeLocation, 4, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(this.colorAttributeLocation);
@@ -59,7 +60,7 @@ export class Polygon extends base_model {
     this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, this.vertices.length);
   }
 
-  isInside(){
+  isInside() {
     return true;
   }
 

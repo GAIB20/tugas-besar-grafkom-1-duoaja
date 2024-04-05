@@ -29,3 +29,39 @@ export function addVertexDot(canvas, positions, shapeIndex) {
         }
     });
 }
+
+export function isCounterClockwise(p1, p2, p) {
+    const res = (p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x);
+    return res > 0;
+}
+
+export function convexHull(points) {
+    if (points.length < 3) return points;
+
+    // find most bottom point
+    let mostBottom = points.reduce((lowest, point) => {
+        return (point.y < lowest.y || (point.y === lowest.y && point.x < lowest.x)) ? point : lowest;
+    }, points[0]);
+
+    // sort points by angle
+    const sorted = points.filter(p => p !== mostBottom).sort((a, b) => {
+        const angleA = Math.atan2(a.y - mostBottom.y, a.x - mostBottom.x);
+        const angleB = Math.atan2(b.y - mostBottom.y, b.x - mostBottom.x);
+        return angleA - angleB;
+    });
+
+    const stack = [mostBottom, sorted[0], sorted[1]];
+
+    for (let i = 2; i < sorted.length; i++) {
+        let top = stack[stack.length - 1];
+        let nextToTop = stack[stack.length - 2];
+        while (stack.length >= 2 && !isCounterClockwise(nextToTop, top, sorted[i])) {
+            stack.pop();
+            top = stack[stack.length - 1];
+            nextToTop = stack[stack.length - 2];
+        }
+        stack.push(sorted[i]);
+    }
+
+    return stack;
+}
