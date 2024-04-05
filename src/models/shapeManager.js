@@ -24,6 +24,9 @@ export class ShapeManager {
     this.lastShearY = 100;
     this.lastRotate = 180;
     this.lastScale = 100;
+    this.lastDrag = 100;
+    this.lastSingleTranslateX = 0;
+    this.lastSingleTranslateY = 0;
 
     // Setup mouse event listeners
     this.mouseUpHandler = this.mouseUpHandler.bind(this);
@@ -348,63 +351,24 @@ export class ShapeManager {
   showTranslationBars(vertexIndex, shapeIndex) {
     const currentShape = this.shapes[shapeIndex];
 
-    const existingUI = document.getElementById("translation-ui");
-    if (existingUI) {
-      existingUI.remove();
-    }
-
-    const uiContainer = document.createElement("div");
-    uiContainer.id = "translation-ui";
-    uiContainer.style.position = "absolute";
-    uiContainer.style.left = `${150}px`;
-    uiContainer.style.top = `${100}px`;
-    document.body.appendChild(uiContainer);
-
-    // Create X-axis slider
-    const xSlider = document.createElement("input");
-    xSlider.type = "range";
-    xSlider.min = "0";
-    xSlider.max = this.canvas.clientWidth.toString();
-    xSlider.value = currentShape.positions[vertexIndex * 2].toString();
-    uiContainer.appendChild(xSlider);
-
-    // Create Y-axis slider
-    const ySlider = document.createElement("input");
-    ySlider.type = "range";
-    ySlider.min = "0";
-    ySlider.max = this.canvas.clientHeight.toString();
-    ySlider.value = currentShape.positions[vertexIndex * 2 + 1].toString();
-    uiContainer.appendChild(ySlider);
-
-    // Create a button to remove the UI
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.addEventListener("click", () => uiContainer.remove());
-    uiContainer.appendChild(removeButton);
-
-    // Slider event listeners to update vertex position
-    xSlider.addEventListener("input", () => {
-      currentShape.positions[vertexIndex * 2] = parseFloat(xSlider.value);
-      // remove the vertex dot with data-shape-index = shapeIndex
-      document
-        .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
-        .forEach((dot) => dot.remove());
-      // add new vertex dot
-      addVertexDot(this.canvas, currentShape.positions, shapeIndex);
-      this.setupVertexDotEventListeners(shapeIndex);
-      this.updateBuffersAndDraw();
+    // translate and transform congurence
+    const translateX = document.getElementById("slider-translate-x-single");
+    translateX.addEventListener("input", () => {
+      this.translateSingleVertexX(translateX.value, vertexIndex, shapeIndex);
     });
-    ySlider.addEventListener("input", () => {
-      currentShape.positions[vertexIndex * 2 + 1] = parseFloat(ySlider.value);
-      // remove the vertex dot with data-shape-index = shapeIndex
-      document
-        .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
-        .forEach((dot) => dot.remove());
-      // add new vertex dot
-      addVertexDot(this.canvas, currentShape.positions, shapeIndex);
-      this.setupVertexDotEventListeners(shapeIndex);
-      this.updateBuffersAndDraw();
+
+    const translateY = document.getElementById("slider-translate-y-single");
+    translateY.addEventListener("input", () => {
+      this.translateSingleVertexY(translateY.value, vertexIndex, shapeIndex);
     });
+
+    document
+      .querySelectorAll(`.vertex-dot[data-shape-index="${shapeIndex}"]`)
+      .forEach((dot) => dot.remove());
+    // add new vertex dot
+    addVertexDot(this.canvas, currentShape.positions, shapeIndex);
+    this.setupVertexDotEventListeners(shapeIndex);
+    this.updateBuffersAndDraw();
   }
   // Handle mouse move event
   mouseMoveHandler(e) {
@@ -584,6 +548,34 @@ export class ShapeManager {
       this.updateBuffersAndDraw();
     }
     this.updateDotPosition();
+  }
+
+  translateSingleVertexX(dx, vertexIndex, shapeIndex) {
+    const newDx = dx - this.lastSingleTranslateX;
+    this.lastSingleTranslateX = dx;
+    const currentShape = this.shapes[shapeIndex];
+    currentShape.positions = ShearManager.translateSingleX(
+      currentShape.positions,
+      newDx,
+      this.canvas.clientWidth / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
+  }
+
+  translateSingleVertexY(dy, vertexIndex, shapeIndex) {
+    const newDy = dy - this.lastSingleTranslateY;
+    this.lastSingleTranslateY = dy;
+    const currentShape = this.shapes[shapeIndex];
+    currentShape.positions = ShearManager.translateSingleY(
+      currentShape.positions,
+      newDy,
+      this.canvas.clientHeight / 2,
+      vertexIndex
+    );
+    this.shapes[shapeIndex] = currentShape;
+    this.updateBuffersAndDraw();
   }
 
   shearActiveShapeX(factor) {
