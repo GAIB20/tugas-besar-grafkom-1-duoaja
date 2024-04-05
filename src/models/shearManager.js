@@ -11,14 +11,20 @@ class ShearManager {
     }
 
     static translateSingleX(positions, value, maxValue, index) {
-        const newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        var newIndex = index;
+        if (positions.length === 8){
+            newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        }
         const factor = value / 100;
         const anchor = positions[newIndex * 2];
         return positions.map((pos, i) => i % 2 === 0 ? pos + (pos - anchor) * factor : pos);
     }
 
     static translateSingleY(positions, value, maxValue, index) {
-        const newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        var newIndex = index;
+        if (positions.length === 8){
+            newIndex = index === 0 ? 3 : index === 1 ? 2 : index === 2 ? 1 : 0;
+        }        
         const factor = value / 100;
         const anchor = positions[newIndex * 2 + 1];
         return positions.map((pos, i) => i % 2 === 1 ? pos + (pos - anchor) * factor : pos);

@@ -567,6 +567,7 @@ export class ShapeManager {
     );
     this.shapes[shapeIndex] = currentShape;
     this.updateBuffersAndDraw();
+    this.updateDotPosition();
   }
 
   translateSingleVertexY(dy, vertexIndex, shapeIndex) {
@@ -581,6 +582,7 @@ export class ShapeManager {
     );
     this.shapes[shapeIndex] = currentShape;
     this.updateBuffersAndDraw();
+    this.updateDotPosition();
   }
 
   shearActiveShapeX(factor) {
@@ -593,6 +595,7 @@ export class ShapeManager {
       );
       this.updateBuffersAndDraw();
     }
+    this.updateDotPosition();
     this.updateDotPosition();
   }
 
@@ -614,6 +617,7 @@ export class ShapeManager {
     );
     this.shapes[shapeIndex] = currentShape;
     this.updateBuffersAndDraw();
+    this.updateDotPosition();
   }
 
   shearActiveShapeY(factor) {
